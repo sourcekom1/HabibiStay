@@ -95,30 +95,24 @@ export default function Navigation() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/">
-                      <a className="flex items-center w-full">
-                        <HomeIcon className="h-4 w-4 mr-2" />
-                        Home
-                      </a>
+                    <Link href="/" className="flex items-center w-full">
+                      <HomeIcon className="h-4 w-4 mr-2" />
+                      Home
                     </Link>
                   </DropdownMenuItem>
                   {user?.userType === 'host' && (
                     <DropdownMenuItem asChild>
-                      <Link href="/host">
-                        <a className="flex items-center w-full">
-                          <Settings className="h-4 w-4 mr-2" />
-                          Host Dashboard
-                        </a>
+                      <Link href="/host" className="flex items-center w-full">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Host Dashboard
                       </Link>
                     </DropdownMenuItem>
                   )}
                   {user?.userType === 'admin' && (
                     <DropdownMenuItem asChild>
-                      <Link href="/admin">
-                        <a className="flex items-center w-full">
-                          <Settings className="h-4 w-4 mr-2" />
-                          Admin Panel
-                        </a>
+                      <Link href="/admin" className="flex items-center w-full">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Admin Panel
                       </Link>
                     </DropdownMenuItem>
                   )}
