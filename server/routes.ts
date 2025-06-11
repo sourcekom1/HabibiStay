@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
 import { 
   insertPropertySchema, 
   insertBookingSchema, 
@@ -174,6 +175,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create review" });
     }
   });
+
+  // PayPal payment routes
+  app.get('/setup', loadPaypalDefault);
+  app.post('/order', createPaypalOrder);
+  app.post('/order/:orderID/capture', capturePaypalOrder);
 
   // Chat routes
   app.get('/api/chat/:sessionId', async (req, res) => {

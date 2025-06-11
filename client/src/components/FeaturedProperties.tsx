@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import BookingModal from "./BookingModal";
 import { useState } from "react";
+import { formatSAR } from "@shared/currency";
 
 export default function FeaturedProperties() {
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -60,7 +61,7 @@ export default function FeaturedProperties() {
             </div>
           ) : (
             featuredProperties?.map((property: any) => (
-              <Card key={property.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+              <Card key={property.id} className="glass-card rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-105">
                 <img
                   src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
                   alt={property.title}
@@ -80,7 +81,7 @@ export default function FeaturedProperties() {
                   <p className="text-gray-500 text-sm mb-4 line-clamp-2">{property.description}</p>
                   <div className="flex justify-between items-center">
                     <div>
-                      <span className="text-2xl font-bold text-gray-900">${property.pricePerNight}</span>
+                      <span className="text-2xl font-bold text-brand-blue">{formatSAR(parseFloat(property.pricePerNight))}</span>
                       <span className="text-gray-500"> / night</span>
                     </div>
                     <Button 
