@@ -64,7 +64,7 @@ export default function FeaturedProperties() {
             featuredProperties.map((property) => (
               <Card key={property.id} className="glass-card rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-105">
                 <img
-                  src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
+                  src={(property.images as string[])?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
                   alt={property.title}
                   className="w-full h-64 object-cover"
                 />
@@ -74,7 +74,7 @@ export default function FeaturedProperties() {
                     <div className="flex items-center space-x-1">
                       <Star className="h-4 w-4 text-yellow-400 fill-current" />
                       <span className="text-sm font-medium text-gray-700">
-                        {parseFloat(property.rating || 0).toFixed(1)}
+                        {parseFloat(property.rating || "0").toFixed(1)}
                       </span>
                     </div>
                   </div>
@@ -100,7 +100,7 @@ export default function FeaturedProperties() {
 
         {/* More Properties Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {moreProperties?.length === 0 ? (
+          {!moreProperties || moreProperties.length === 0 ? (
             <div className="col-span-4 text-center py-8">
               <div className="text-gray-500 mb-4">
                 <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,10 +111,10 @@ export default function FeaturedProperties() {
               <p className="text-gray-600">Properties will appear here once they are added by hosts.</p>
             </div>
           ) : (
-            moreProperties?.slice(0, 4).map((property: any) => (
+            moreProperties.slice(0, 4).map((property) => (
               <Card key={property.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <img
-                  src={property.images?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"}
+                  src={(property.images as string[])?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"}
                   alt={property.title}
                   className="w-full h-48 object-cover"
                 />
@@ -126,7 +126,7 @@ export default function FeaturedProperties() {
                     <div className="flex items-center space-x-1">
                       <Star className="h-3 w-3 text-yellow-400 fill-current" />
                       <span className="text-xs text-gray-700">
-                        {parseFloat(property.rating || 0).toFixed(1)}
+                        {parseFloat(property.rating || "0").toFixed(1)}
                       </span>
                     </div>
                   </div>

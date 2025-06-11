@@ -77,7 +77,7 @@ export default function Navigation() {
                   >
                     <Menu className="h-4 w-4 text-gray-600" />
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={user?.profileImageUrl} />
+                      <AvatarImage src={user?.profileImageUrl || undefined} />
                       <AvatarFallback>
                         <User className="h-4 w-4" />
                       </AvatarFallback>
