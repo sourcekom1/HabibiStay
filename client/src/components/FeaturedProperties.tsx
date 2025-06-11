@@ -160,41 +160,77 @@ export default function FeaturedProperties() {
         </div>
 
         {/* More Properties Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {!moreProperties || moreProperties.length === 0 ? (
-            <div className="col-span-4 text-center py-8">
-              <div className="text-gray-500 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0h2m5 0v-1.5a2.5 2.5 0 00-2.5-2.5H7.5a2.5 2.5 0 00-2.5 2.5V21" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No properties available</h3>
-              <p className="text-gray-600">Properties will appear here once they are added by hosts.</p>
-            </div>
-          ) : (
-            moreProperties.slice(0, 4).map((property) => (
-              <Card key={property.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <img
-                  src={(property.images as string[])?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"}
-                  alt={property.title}
-                  className="w-full h-48 object-cover"
-                />
-                <CardContent className="p-4">
-                  <h4 className="font-semibold text-gray-900 mb-1 truncate">{property.title}</h4>
-                  <p className="text-gray-600 text-sm mb-2 truncate">{property.location}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-gray-900">${property.pricePerNight}/night</span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                      <span className="text-xs text-gray-700">
-                        {parseFloat(property.rating || "0").toFixed(1)}
-                      </span>
-                    </div>
+        <div className={`${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>
+          <h3 className="text-3xl font-bold gradient-text text-center mb-8">More Properties</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {!moreProperties || moreProperties.length === 0 ? (
+              <div className="col-span-4 text-center py-12">
+                <div className="glass-card p-8 mx-auto max-w-sm">
+                  <div className="text-brand-blue mb-4">
+                    <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0h2m5 0v-1.5a2.5 2.5 0 00-2.5-2.5H7.5a2.5 2.5 0 00-2.5 2.5V21" />
+                    </svg>
                   </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No properties available</h3>
+                  <p className="text-gray-600 dark:text-gray-400">Properties will appear here once they are added by hosts.</p>
+                </div>
+              </div>
+            ) : (
+              moreProperties.slice(0, 4).map((property, index) => (
+                <Card 
+                  key={property.id} 
+                  className={`glass-card rounded-2xl overflow-hidden group cursor-pointer hover:scale-105 transition-all duration-300 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}
+                  style={{ animationDelay: `${0.8 + index * 0.1}s` }}
+                  onClick={() => handleBookProperty(property)}
+                >
+                  <div className="relative overflow-hidden">
+                    <img
+                      src={(property.images as string[])?.[0] || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"}
+                      alt={property.title}
+                      className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(property.id);
+                      }}
+                      className="absolute top-3 right-3 p-2 rounded-full glass-button transition-all duration-300 hover:scale-110"
+                    >
+                      <Heart 
+                        className={`h-4 w-4 transition-colors duration-300 ${
+                          likedProperties.has(property.id) 
+                            ? 'text-red-500 fill-current' 
+                            : 'text-white hover:text-red-400'
+                        }`} 
+                      />
+                    </button>
+                  </div>
+                  <CardContent className="p-5">
+                    <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-1 truncate group-hover:text-brand-blue transition-colors duration-300">
+                      {property.title}
+                    </h4>
+                    <div className="flex items-center text-gray-600 dark:text-gray-300 mb-3">
+                      <MapPin className="h-3 w-3 mr-1 text-brand-blue" />
+                      <span className="text-sm truncate">{property.location}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-lg font-bold gradient-text">{formatSAR(parseFloat(property.pricePerNight))}</span>
+                        <span className="text-gray-500 dark:text-gray-400 text-sm"> / night</span>
+                      </div>
+                      <div className="flex items-center space-x-1 glass-button px-2 py-1 rounded-full">
+                        <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                          {parseFloat(property.rating || "0").toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </section>
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -14,8 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Info } from "lucide-react";
+import { Lock, Info, Calendar, Users, CreditCard, MapPin, Star } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { formatSAR } from "@shared/currency";
 
 interface BookingModalProps {
   property: any;
@@ -26,6 +27,7 @@ interface BookingModalProps {
 export default function BookingModal({ property, isOpen, onClose }: BookingModalProps) {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const [isVisible, setIsVisible] = useState(false);
   const [bookingData, setBookingData] = useState({
     checkIn: "",
     checkOut: "",
@@ -36,6 +38,12 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
     phone: "",
     paymentMethod: "card"
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+    }
+  }, [isOpen]);
 
   const bookingMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -124,48 +132,78 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold text-gray-900">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto glass-card border-brand-blue/20">
+        <DialogHeader className={`${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
+          <DialogTitle className="text-3xl font-bold gradient-text text-center mb-2">
             Complete Your Booking
           </DialogTitle>
+          <p className="text-gray-600 dark:text-gray-300 text-center">
+            Secure your perfect getaway with just a few clicks
+          </p>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
           {/* Property Summary */}
-          <Card className="bg-gray-50">
-            <CardContent className="p-4">
-              <img
-                src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
-                alt={property.title}
-                className="w-full h-32 object-cover rounded-lg mb-4"
-              />
-              <h4 className="font-semibold text-gray-900 mb-2">{property.title}</h4>
-              <p className="text-gray-600 text-sm mb-4">{property.location}</p>
-              
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Check-in:</span>
-                  <span>{bookingData.checkIn || "Select date"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Check-out:</span>
-                  <span>{bookingData.checkOut || "Select date"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Guests:</span>
-                  <span>{bookingData.guests} guest{bookingData.guests > 1 ? 's' : ''}</span>
-                </div>
-                {nights > 0 && (
-                  <div className="flex justify-between">
-                    <span>Nights:</span>
-                    <span>{nights}</span>
+          <Card className={`glass-card border-brand-blue/30 ${isVisible ? 'animate-slide-left' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+            <CardContent className="p-6">
+              <div className="relative overflow-hidden rounded-2xl mb-6">
+                <img
+                  src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
+                  alt={property.title}
+                  className="w-full h-48 object-cover transition-transform duration-500 hover:scale-110"
+                />
+                <div className="absolute top-4 right-4 glass-button px-3 py-1 rounded-full">
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      {parseFloat(property.rating || "0").toFixed(1)}
+                    </span>
                   </div>
-                )}
-                <hr className="my-2" />
-                <div className="flex justify-between font-semibold">
-                  <span>Total:</span>
-                  <span>${total.toLocaleString()}</span>
+                </div>
+              </div>
+              
+              <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">{property.title}</h4>
+              <div className="flex items-center text-gray-600 dark:text-gray-300 mb-6">
+                <MapPin className="h-4 w-4 mr-2 text-brand-blue" />
+                <span className="font-medium">{property.location}</span>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="glass-button p-4 rounded-2xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <Calendar className="h-5 w-5 mr-2 text-brand-blue" />
+                      <span className="font-medium">Check-in:</span>
+                    </div>
+                    <span className="text-brand-blue font-semibold">{bookingData.checkIn || "Select date"}</span>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <Calendar className="h-5 w-5 mr-2 text-brand-blue" />
+                      <span className="font-medium">Check-out:</span>
+                    </div>
+                    <span className="text-brand-blue font-semibold">{bookingData.checkOut || "Select date"}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Users className="h-5 w-5 mr-2 text-brand-blue" />
+                      <span className="font-medium">Guests:</span>
+                    </div>
+                    <span className="text-brand-blue font-semibold">{bookingData.guests} guest{bookingData.guests > 1 ? 's' : ''}</span>
+                  </div>
+                  {nights > 0 && (
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="font-medium">Nights:</span>
+                      <span className="text-brand-blue font-semibold">{nights}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="glass-button p-4 rounded-2xl border-2 border-brand-blue/30">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Total:</span>
+                    <span className="text-2xl font-bold gradient-text">{formatSAR(total)}</span>
+                  </div>
                 </div>
               </div>
             </CardContent>
