@@ -40,10 +40,8 @@ export default function Navigation() {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <Link href="/">
-                <a className="text-gray-900 hover:text-brand-blue px-3 py-2 text-sm font-medium transition-colors">
-                  Home
-                </a>
+              <Link href="/" className="text-gray-900 hover:text-brand-blue px-3 py-2 text-sm font-medium transition-colors">
+                Home
               </Link>
               <a 
                 href="#experiences" 
@@ -52,10 +50,8 @@ export default function Navigation() {
                 Experiences
               </a>
               {isAuthenticated && user?.userType === 'host' && (
-                <Link href="/host">
-                  <a className="text-gray-600 hover:text-brand-blue px-3 py-2 text-sm font-medium transition-colors">
-                    Host Dashboard
-                  </a>
+                <Link href="/host" className="text-gray-600 hover:text-brand-blue px-3 py-2 text-sm font-medium transition-colors">
+                  Host Dashboard
                 </Link>
               )}
             </div>

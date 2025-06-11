@@ -5,20 +5,21 @@ import { Star } from "lucide-react";
 import BookingModal from "./BookingModal";
 import { useState } from "react";
 import { formatSAR } from "@shared/currency";
+import type { Property } from "@shared/schema";
 
 export default function FeaturedProperties() {
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
-  const { data: featuredProperties, isLoading } = useQuery({
+  const { data: featuredProperties, isLoading } = useQuery<Property[]>({
     queryKey: ["/api/properties", { featured: true, limit: 2 }],
   });
 
-  const { data: moreProperties } = useQuery({
+  const { data: moreProperties } = useQuery<Property[]>({
     queryKey: ["/api/properties", { limit: 4 }],
   });
 
-  const handleBookProperty = (property: any) => {
+  const handleBookProperty = (property: Property) => {
     setSelectedProperty(property);
     setIsBookingModalOpen(true);
   };
@@ -49,7 +50,7 @@ export default function FeaturedProperties() {
 
         {/* Featured Properties Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
-          {featuredProperties?.length === 0 ? (
+          {!featuredProperties || featuredProperties.length === 0 ? (
             <div className="col-span-2 text-center py-16">
               <div className="text-gray-500 mb-4">
                 <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,7 +61,7 @@ export default function FeaturedProperties() {
               <p className="text-gray-600">Featured properties will appear here once they are added by hosts.</p>
             </div>
           ) : (
-            featuredProperties?.map((property: any) => (
+            featuredProperties.map((property) => (
               <Card key={property.id} className="glass-card rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 hover:transform hover:scale-105">
                 <img
                   src={property.images?.[0] || "https://images.unsplash.com/photo-1571896349842-33c89424de2d"}
