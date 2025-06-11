@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search } from "lucide-react";
+import { Search, MapPin, Calendar, Users } from "lucide-react";
 
 export default function HeroSection() {
   const [searchData, setSearchData] = useState({
@@ -11,9 +11,13 @@ export default function HeroSection() {
     checkOut: "",
     guests: ""
   });
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const handleSearch = () => {
-    // In a real implementation, this would navigate to search results
     console.log("Performing search with:", searchData);
   };
 
@@ -22,75 +26,101 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative">
-      {/* Hero Image */}
+    <section className="relative overflow-hidden">
+      {/* Animated Background Orbs */}
+      <div className="bg-orb w-64 h-64 top-10 left-10 opacity-30" style={{ animationDelay: '0s' }}></div>
+      <div className="bg-orb w-48 h-48 top-32 right-20 opacity-20" style={{ animationDelay: '5s' }}></div>
+      <div className="bg-orb w-72 h-72 bottom-20 left-1/3 opacity-15" style={{ animationDelay: '10s' }}></div>
+
+      {/* Hero Section */}
       <div 
-        className="h-96 bg-cover bg-center relative"
+        className="min-h-[600px] bg-cover bg-center relative"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=800')"
         }}
       >
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-        <div className="relative z-10 flex items-center justify-center h-full">
-          <div className="text-center text-white max-w-4xl mx-auto px-4">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">Find your perfect stay</h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-blue-800/30 to-blue-700/40"></div>
+        <div className="relative z-10 flex items-center justify-center min-h-[600px] px-4">
+          <div className={`text-center text-white max-w-5xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 gradient-text">
+              Find your perfect stay
+            </h1>
+            <p className="text-xl md:text-3xl mb-12 opacity-95 font-light">
               Discover amazing places to stay around the world
             </p>
           </div>
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-full shadow-2xl p-2">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <div className="flex-1 px-4 py-3">
-              <Label className="block text-xs font-medium text-gray-700 mb-1">Where</Label>
+      {/* Enhanced Glass Search Bar */}
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-6xl mx-auto px-4">
+        <div className={`glass-search rounded-3xl p-3 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            {/* Where */}
+            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20">
+              <div className="flex items-center mb-2">
+                <MapPin className="h-4 w-4 text-brand-blue mr-2" />
+                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Where</Label>
+              </div>
               <Input
                 type="text"
                 placeholder="Search destinations"
                 value={searchData.where}
                 onChange={(e) => handleInputChange("where", e.target.value)}
-                className="w-full text-sm border-0 p-0 focus:ring-0 shadow-none"
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
               />
             </div>
-            <div className="flex-1 px-4 py-3 border-l border-gray-200">
-              <Label className="block text-xs font-medium text-gray-700 mb-1">Check in</Label>
+
+            {/* Check in */}
+            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
+              <div className="flex items-center mb-2">
+                <Calendar className="h-4 w-4 text-brand-blue mr-2" />
+                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check in</Label>
+              </div>
               <Input
                 type="date"
                 value={searchData.checkIn}
                 onChange={(e) => handleInputChange("checkIn", e.target.value)}
-                className="w-full text-sm border-0 p-0 focus:ring-0 shadow-none"
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none font-medium"
               />
             </div>
-            <div className="flex-1 px-4 py-3 border-l border-gray-200">
-              <Label className="block text-xs font-medium text-gray-700 mb-1">Check out</Label>
+
+            {/* Check out */}
+            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
+              <div className="flex items-center mb-2">
+                <Calendar className="h-4 w-4 text-brand-blue mr-2" />
+                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check out</Label>
+              </div>
               <Input
                 type="date"
                 value={searchData.checkOut}
                 onChange={(e) => handleInputChange("checkOut", e.target.value)}
-                className="w-full text-sm border-0 p-0 focus:ring-0 shadow-none"
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none font-medium"
               />
             </div>
-            <div className="flex items-center px-4 py-3 border-l border-gray-200">
+
+            {/* Guests and Search */}
+            <div className="flex items-center px-6 py-4 border-l border-gray-200/30">
               <div className="flex-1">
-                <Label className="block text-xs font-medium text-gray-700 mb-1">Who</Label>
+                <div className="flex items-center mb-2">
+                  <Users className="h-4 w-4 text-brand-blue mr-2" />
+                  <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Who</Label>
+                </div>
                 <Input
                   type="number"
                   placeholder="Add guests"
                   min="1"
                   value={searchData.guests}
                   onChange={(e) => handleInputChange("guests", e.target.value)}
-                  className="w-full text-sm border-0 p-0 focus:ring-0 shadow-none"
+                  className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
                 />
               </div>
               <Button
                 onClick={handleSearch}
-                className="bg-brand-blue text-white p-3 rounded-full hover:bg-brand-blue-dark transition-colors ml-2"
-                size="sm"
+                className="bg-brand-blue text-white p-4 rounded-2xl hover:bg-brand-blue-dark transition-all duration-300 ml-4 pulse-glow shadow-lg hover:shadow-xl transform hover:scale-105"
+                size="lg"
               >
-                <Search className="h-4 w-4" />
+                <Search className="h-5 w-5" />
               </Button>
             </div>
           </div>
