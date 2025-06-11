@@ -1,0 +1,70 @@
+**Prompt for AI Development of Habibistay:**
+
+**Project Overview:**
+Develop Habibistay, a comprehensive Airbnb clone that emphasizes advanced tools for hosts, including a channel manager for seamless listing management and in-depth financial reporting. The platform should cater to a diverse range of users, ensuring a smooth experience for both guests and hosts.
+
+**Investor Highlights:**
+1. **Proven Returns:** Average annual ROI of 17%
+2. **End-to-End Management:** Fully hands-off control for hosts.
+3. **Diverse Portfolio:** Features both prime tourist and emerging market properties.
+4. **Security & Transparency:** Secure payment processing, regular reporting, and real-time ROI dashboards.
+
+**Branding:**
+- **Color Scheme:** Primary brand color is #2957c3 (blue).
+
+**Core Features:**
+
+1. **Admin Dashboard:**
+   - Frontend editor for easy management of listings and content.
+   - AI capabilities for booking management and integrated payment processing (MyFatoorah, PayPal).
+   - Configurable AI model selection by admin.
+
+2. **Guest Experience:**
+   - AI agent "Sara" to interact with users, assess accommodation needs, and initiate conversations.
+   - Showcase 2 featured properties with high-quality images, detailed descriptions, amenities, pricing, and booking buttons.
+   - Implement a button- and voice-driven chatbot interface for property discovery, booking, login/register, payment, and support.
+   - Collect guest information and process payments via embedded MyFatoorah buttons.
+   - Provide instant booking confirmations and check-in instructions.
+
+3. **Post-Booking Support:**
+   - "Sara" to assist guests with property questions, check-in/check-out assistance, stay issue resolutions, and local recommendations.
+
+**User Interface Design:**
+- Create a clean, modern UI using the brand blue, ample white space, readable sans-serif fonts, clear visual hierarchy, and intuitive navigation.
+- Ensure full responsiveness and accessibility across all devices.
+
+**Guest Features:**
+1. Onboarding and Profile Management: Easy sign-up options (social media/email) with profile verification.
+2. Search Tools: Comprehensive filtering for location, dates, amenities, and room types, along with an interactive map view.
+3. Booking Management: Features for booking requests, instant booking, host contact, and trip management.
+4. Payment Options: Secure gateways and clear cancellation policies.
+5. Host Interaction: Contact features and review capabilities.
+
+**Host Features:**
+1. Onboarding: Identity verification and property listing setup.
+2. Listing Management: Easy editing, pricing options, and customizations.
+3. Booking Management: Calendar sync and flexible booking rules.
+4. Guest Communication: Tracking booking requests and inquiries.
+5. Payment Setup: Direct payouts and financial tracking.
+6. Dispute Management: Review guest feedback and resolve disputes.
+
+**Admin Features:**
+- Comprehensive management of hosts, properties, users, reviews, and disputes.
+- User management with detailed exporting options.
+- Room and reservation management with penalties for cancellations.
+- Email management, wishlist oversight, and referral management.
+- Reporting capabilities for users, rooms, and reservations.
+
+**Sara Chatbot Integration:**
+- Voice/button-driven chatbot for guest interactions.
+- Initiates conversations with featured properties.
+- Full booking flow within the chat interface.
+- Responsive design for mobile devices.
+
+**Development Considerations:**
+- Ensure security and transparency in payment processing.
+- Implement a robust backend for data management and reporting.
+- Prioritize user experience for both guests and hosts throughout the platform.
+- Utilize best practices in API management and SEO for enhanced visibility. 
+
+This prompt aims to guide the AI in developing a fully functional, user-friendly platform that meets the outlined specifications and enhances the overall experience for all users involved.

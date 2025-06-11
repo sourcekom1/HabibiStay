@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Sparkles, Mic, MicOff } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface ChatMessage {
@@ -19,9 +19,15 @@ export default function SaraChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
+  const [isListening, setIsListening] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data: messages = [], refetch } = useQuery({
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  const { data: messages = [], refetch } = useQuery<ChatMessage[]>({
     queryKey: [`/api/chat/${sessionId}`],
     enabled: isOpen,
   });

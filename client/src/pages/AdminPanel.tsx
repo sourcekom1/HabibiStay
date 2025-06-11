@@ -15,7 +15,11 @@ import {
   Download,
   ArrowLeft,
   Eye,
-  Edit 
+  Edit,
+  Sparkles,
+  DollarSign,
+  TrendingUp,
+  Activity
 } from "lucide-react";
 
 export default function AdminPanel() {

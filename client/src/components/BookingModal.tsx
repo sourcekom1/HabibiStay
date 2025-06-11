@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Info, Calendar, Users, CreditCard, MapPin, Star } from "lucide-react";
+import { Lock, Info, Calendar, Users, CreditCard, MapPin, Star, User } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { formatSAR } from "@shared/currency";
 
@@ -209,35 +209,41 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
             </CardContent>
           </Card>
 
-          {/* Booking Form */}
-          <div className="space-y-4">
+          {/* Enhanced Booking Form */}
+          <div className={`space-y-6 ${isVisible ? 'animate-slide-right' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
             {/* Dates and Guests */}
-            <div>
-              <h5 className="font-medium text-gray-900 mb-3">Booking Details</h5>
-              <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="glass-button p-6 rounded-2xl">
+              <div className="flex items-center mb-4">
+                <Calendar className="h-5 w-5 mr-2 text-brand-blue" />
+                <h5 className="text-lg font-bold text-gray-900 dark:text-gray-100">Booking Details</h5>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <Label htmlFor="checkin">Check-in</Label>
+                  <Label htmlFor="checkin" className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">Check-in</Label>
                   <Input
                     id="checkin"
                     type="date"
                     value={bookingData.checkIn}
                     onChange={(e) => handleInputChange("checkIn", e.target.value)}
-                    className="mt-1"
+                    className="glass-button border-brand-blue/30 rounded-xl focus:border-brand-blue transition-all duration-300"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="checkout">Check-out</Label>
+                  <Label htmlFor="checkout" className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">Check-out</Label>
                   <Input
                     id="checkout"
                     type="date"
                     value={bookingData.checkOut}
                     onChange={(e) => handleInputChange("checkOut", e.target.value)}
-                    className="mt-1"
+                    className="glass-button border-brand-blue/30 rounded-xl focus:border-brand-blue transition-all duration-300"
                   />
                 </div>
               </div>
               <div>
-                <Label htmlFor="guests">Number of Guests</Label>
+                <Label htmlFor="guests" className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block flex items-center">
+                  <Users className="h-4 w-4 mr-2 text-brand-blue" />
+                  Number of Guests
+                </Label>
                 <Input
                   id="guests"
                   type="number"
@@ -245,83 +251,90 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
                   max={property.maxGuests || 10}
                   value={bookingData.guests}
                   onChange={(e) => handleInputChange("guests", parseInt(e.target.value))}
-                  className="mt-1"
+                  className="glass-button border-brand-blue/30 rounded-xl focus:border-brand-blue transition-all duration-300"
                 />
               </div>
             </div>
 
             {/* Guest Information */}
-            <div>
-              <h5 className="font-medium text-gray-900 mb-3">Guest Information</h5>
-              <div className="grid grid-cols-2 gap-3 mb-3">
+            <div className="glass-button p-6 rounded-2xl">
+              <div className="flex items-center mb-4">
+                <User className="h-5 w-5 mr-2 text-brand-blue" />
+                <h5 className="text-lg font-bold text-gray-900 dark:text-gray-100">Guest Information</h5>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <Label htmlFor="firstName">First Name *</Label>
+                  <Label htmlFor="firstName" className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">First Name *</Label>
                   <Input
                     id="firstName"
                     type="text"
                     value={bookingData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
-                    className="mt-1"
+                    className="glass-button border-brand-blue/30 rounded-xl focus:border-brand-blue transition-all duration-300"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Label htmlFor="lastName" className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">Last Name *</Label>
                   <Input
                     id="lastName"
                     type="text"
                     value={bookingData.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value)}
-                    className="mt-1"
+                    className="glass-button border-brand-blue/30 rounded-xl focus:border-brand-blue transition-all duration-300"
                     required
                   />
                 </div>
               </div>
-              <div className="mb-3">
-                <Label htmlFor="email">Email Address *</Label>
+              <div className="mb-4">
+                <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
                   value={bookingData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className="mt-1"
+                  className="glass-button border-brand-blue/30 rounded-xl focus:border-brand-blue transition-all duration-300"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone" className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">Phone Number</Label>
                 <Input
                   id="phone"
                   type="tel"
                   value={bookingData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
-                  className="mt-1"
+                  className="glass-button border-brand-blue/30 rounded-xl focus:border-brand-blue transition-all duration-300"
                 />
               </div>
             </div>
 
             {/* Payment Method */}
-            <div>
-              <h5 className="font-medium text-gray-900 mb-3">Payment Method</h5>
+            <div className="glass-button p-6 rounded-2xl">
+              <div className="flex items-center mb-4">
+                <CreditCard className="h-5 w-5 mr-2 text-brand-blue" />
+                <h5 className="text-lg font-bold text-gray-900 dark:text-gray-100">Payment Method</h5>
+              </div>
               <RadioGroup
                 value={bookingData.paymentMethod}
                 onValueChange={(value) => handleInputChange("paymentMethod", value)}
+                className="space-y-3"
               >
-                <div className="flex items-center space-x-2">
+                <div className="glass-button p-4 rounded-xl flex items-center space-x-3 cursor-pointer hover:border-brand-blue/50 transition-all duration-300">
                   <RadioGroupItem value="card" id="card" />
-                  <Label htmlFor="card">Credit/Debit Card</Label>
+                  <Label htmlFor="card" className="font-medium cursor-pointer">Credit/Debit Card</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="glass-button p-4 rounded-xl flex items-center space-x-3 cursor-pointer hover:border-brand-blue/50 transition-all duration-300">
                   <RadioGroupItem value="paypal" id="paypal" />
-                  <Label htmlFor="paypal">PayPal</Label>
+                  <Label htmlFor="paypal" className="font-medium cursor-pointer">PayPal</Label>
                 </div>
               </RadioGroup>
             </div>
 
             {/* Payment Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800 flex items-center">
-                <Info className="h-4 w-4 mr-2" />
+            <div className="glass-button p-6 rounded-2xl border-2 border-blue-200/50 bg-blue-50/50 dark:bg-blue-900/20">
+              <p className="text-blue-800 dark:text-blue-200 flex items-center font-medium">
+                <Info className="h-5 w-5 mr-3 text-brand-blue" />
                 Payment processing is handled securely through MyFatoorah. Your booking will be confirmed instantly.
               </p>
             </div>
@@ -330,10 +343,10 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
             <Button
               onClick={handleSubmit}
               disabled={bookingMutation.isPending || total === 0}
-              className="w-full bg-brand-blue text-white py-3 px-4 rounded-md hover:bg-brand-blue-dark transition-colors font-medium"
+              className="w-full glass-button bg-brand-blue text-white py-4 px-6 rounded-2xl hover:bg-brand-blue-dark transition-all duration-300 font-semibold text-lg border-2 border-brand-blue hover:scale-105 pulse-glow"
             >
-              <Lock className="h-4 w-4 mr-2" />
-              {bookingMutation.isPending ? "Processing..." : `Complete Secure Booking - $${total.toLocaleString()}`}
+              <Lock className="h-5 w-5 mr-3" />
+              {bookingMutation.isPending ? "Processing..." : `Complete Secure Booking - ${formatSAR(total)}`}
             </Button>
           </div>
         </div>
