@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, MapPin, Calendar, Users } from "lucide-react";
 
 export default function HeroSection() {
+  const [, setLocation] = useLocation();
   const [searchData, setSearchData] = useState({
     where: "",
     checkIn: "",
     checkOut: "",
-    guests: ""
+    guests: "1"
   });
   const [isVisible, setIsVisible] = useState(false);
 
@@ -18,8 +20,21 @@ export default function HeroSection() {
   }, []);
 
   const handleSearch = () => {
-    console.log("Performing search with:", searchData);
+    if (!searchData.where || !searchData.checkIn || !searchData.checkOut) {
+      return;
+    }
+    
+    const searchParams = new URLSearchParams({
+      location: searchData.where,
+      checkIn: searchData.checkIn,
+      checkOut: searchData.checkOut,
+      guests: searchData.guests || "1"
+    });
+    
+    setLocation(`/search?${searchParams.toString()}`);
   };
+
+  const isFormValid = searchData.where && searchData.checkIn && searchData.checkOut;
 
   const handleInputChange = (field: string, value: string) => {
     setSearchData(prev => ({ ...prev, [field]: value }));
@@ -60,14 +75,17 @@ export default function HeroSection() {
             <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20">
               <div className="flex items-center mb-2">
                 <MapPin className="h-4 w-4 text-brand-blue mr-2" />
-                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Where</Label>
+                <Label htmlFor="search-where" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Where</Label>
               </div>
               <Input
+                id="search-where"
                 type="text"
                 placeholder="Search destinations"
                 value={searchData.where}
                 onChange={(e) => handleInputChange("where", e.target.value)}
                 className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
+                required
+                aria-label="Enter destination"
               />
             </div>
 
@@ -75,13 +93,17 @@ export default function HeroSection() {
             <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
               <div className="flex items-center mb-2">
                 <Calendar className="h-4 w-4 text-brand-blue mr-2" />
-                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check in</Label>
+                <Label htmlFor="search-checkin" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check in</Label>
               </div>
               <Input
+                id="search-checkin"
                 type="date"
                 value={searchData.checkIn}
                 onChange={(e) => handleInputChange("checkIn", e.target.value)}
                 className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none font-medium"
+                required
+                aria-label="Select check-in date"
+                min={new Date().toISOString().split('T')[0]}
               />
             </div>
 
@@ -89,13 +111,17 @@ export default function HeroSection() {
             <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
               <div className="flex items-center mb-2">
                 <Calendar className="h-4 w-4 text-brand-blue mr-2" />
-                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check out</Label>
+                <Label htmlFor="search-checkout" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check out</Label>
               </div>
               <Input
+                id="search-checkout"
                 type="date"
                 value={searchData.checkOut}
                 onChange={(e) => handleInputChange("checkOut", e.target.value)}
                 className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none font-medium"
+                required
+                aria-label="Select check-out date"
+                min={searchData.checkIn || new Date().toISOString().split('T')[0]}
               />
             </div>
 
@@ -104,20 +130,29 @@ export default function HeroSection() {
               <div className="flex-1">
                 <div className="flex items-center mb-2">
                   <Users className="h-4 w-4 text-brand-blue mr-2" />
-                  <Label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Who</Label>
+                  <Label htmlFor="search-guests" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Who</Label>
                 </div>
                 <Input
+                  id="search-guests"
                   type="number"
                   placeholder="Add guests"
                   min="1"
+                  max="20"
                   value={searchData.guests}
                   onChange={(e) => handleInputChange("guests", e.target.value)}
                   className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
+                  aria-label="Number of guests"
                 />
               </div>
               <Button
                 onClick={handleSearch}
-                className="bg-brand-blue text-white p-4 rounded-2xl hover:bg-brand-blue-dark transition-all duration-300 ml-4 pulse-glow shadow-lg hover:shadow-xl transform hover:scale-105"
+                disabled={!isFormValid}
+                className={`p-4 rounded-2xl transition-all duration-300 ml-4 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                  isFormValid 
+                    ? 'bg-brand-blue text-white hover:bg-brand-blue-dark pulse-glow' 
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+                aria-label="Search properties"
                 size="lg"
               >
                 <Search className="h-5 w-5" />
