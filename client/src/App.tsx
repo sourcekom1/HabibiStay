@@ -37,6 +37,7 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/invest" component={Invest} />
           <Route path="/contact" component={Contact} />
+          <Route path="/become-host" component={BecomeHost} />
           <Route path="/host" component={HostDashboard} />
         </>
       ) : (
@@ -46,6 +47,7 @@ function Router() {
           <Route path="/about" component={About} />
           <Route path="/invest" component={Invest} />
           <Route path="/contact" component={Contact} />
+          <Route path="/become-host" component={BecomeHost} />
           <Route path="/host" component={HostDashboard} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/favorites" component={FavoritesPage} />

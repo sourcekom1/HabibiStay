@@ -35,7 +35,15 @@ export default function BecomeHost() {
   });
 
   const hostApplicationMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/host/apply', { method: 'POST', body: data }),
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/host/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to submit application');
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Application Submitted!",

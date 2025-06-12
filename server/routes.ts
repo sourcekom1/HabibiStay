@@ -429,6 +429,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Enhanced API routes for new features
   
+  // Host application routes
+  app.post('/api/host/apply', async (req, res) => {
+    try {
+      const { propertyType, address, description, phone, experience } = req.body;
+      
+      // Create a notification for admin review
+      await storage.createNotification({
+        userId: 'admin',
+        type: 'host_application',
+        title: 'New Host Application',
+        message: `New host application from ${phone} for ${propertyType} in ${address}`,
+        metadata: JSON.stringify({ propertyType, address, description, phone, experience })
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Application submitted successfully! We'll review it within 24 hours." 
+      });
+    } catch (error) {
+      console.error("Error submitting host application:", error);
+      res.status(500).json({ message: "Failed to submit application" });
+    }
+  });
+  
   // Notifications routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {
