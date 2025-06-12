@@ -38,7 +38,7 @@ export default function Navigation() {
   });
 
   // Fetch user favorites count
-  const { data: userFavorites = [] } = useQuery({
+  const { data: userFavorites = [] } = useQuery<any[]>({
     queryKey: ['/api/favorites'],
     enabled: !!user,
   });

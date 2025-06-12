@@ -95,10 +95,8 @@ export function performanceMiddleware(req: Request, res: Response, next: NextFun
   const startTime = Date.now();
   const startMemory = process.memoryUsage();
   
-  // Store original end method
-  const originalEnd = res.end;
-  
-  res.end = function(...args: any[]) {
+  // Track response completion
+  res.on('finish', () => {
     const duration = Date.now() - startTime;
     const endMemory = process.memoryUsage();
     
@@ -122,13 +120,7 @@ export function performanceMiddleware(req: Request, res: Response, next: NextFun
     };
     
     performanceMonitor.addMetric(metric);
-    
-    // Add performance headers
-    res.setHeader('X-Response-Time', `${duration}ms`);
-    res.setHeader('X-Memory-Usage', `${Math.round(memoryDelta.heapUsed / 1024 / 1024)}MB`);
-    
-    return originalEnd.apply(this, args);
-  };
+  });
   
   next();
 }
