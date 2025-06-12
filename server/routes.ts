@@ -644,6 +644,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Settings routes for admin
+  app.get('/api/admin/ai-settings', isAuthenticated, async (req, res) => {
+    try {
+      // Return default AI settings (in a real app, this would be stored in database)
+      const defaultSettings = {
+        id: 1,
+        modelProvider: "openai",
+        modelName: "gpt-4o",
+        temperature: 0.7,
+        maxTokens: 800,
+        systemPrompt: "You are Sara, a helpful travel assistant for an Airbnb-like platform. Help users find properties, make bookings, and answer travel-related questions. Be friendly, concise, and professional.",
+        enableVoiceRecognition: true,
+        enableAutoResponses: true,
+        responseDelay: 1000,
+        isActive: true,
+      };
+      res.json(defaultSettings);
+    } catch (error) {
+      console.error("Error fetching AI settings:", error);
+      res.status(500).json({ message: "Failed to fetch AI settings" });
+    }
+  });
+
+  app.post('/api/admin/ai-settings', isAuthenticated, async (req, res) => {
+    try {
+      const settings = req.body;
+      // In a real app, save settings to database
+      console.log("AI settings updated:", settings);
+      res.json({ message: "AI settings saved successfully", settings });
+    } catch (error) {
+      console.error("Error saving AI settings:", error);
+      res.status(500).json({ message: "Failed to save AI settings" });
+    }
+  });
+
+  app.post('/api/admin/test-ai', isAuthenticated, async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      // Test AI response using the OpenAI integration
+      const properties = await storage.getProperties({ featured: true, limit: 3 });
+      const aiResponse = await generateChatResponse(message, {
+        previousMessages: [],
+        userType: "guest",
+        properties
+      });
+
+      res.json({ 
+        response: aiResponse.message,
+        messageType: aiResponse.messageType 
+      });
+    } catch (error) {
+      console.error("Error testing AI:", error);
+      res.status(500).json({ 
+        response: "AI test failed. Please check your configuration and API keys.",
+        messageType: "error"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

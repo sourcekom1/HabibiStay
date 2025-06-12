@@ -20,6 +20,7 @@ import NotFound from "@/pages/not-found";
 import FavoritesPage from "@/components/FavoritesPage";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
+import AiSettings from "@/pages/AiSettings";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -63,6 +64,7 @@ function Router() {
           <Route path="/privacy" component={PrivacyPolicy} />
           <Route path="/faq" component={FAQ} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/admin/ai-settings" component={AiSettings} />
           <Route path="/favorites" component={FavoritesPage} />
         </>
       )}

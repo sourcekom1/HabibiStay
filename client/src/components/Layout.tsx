@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Navigation from "./Navigation";
 import MobileFooter from "./MobileFooter";
+import SaraChatbot from "./SaraChatbot";
 
 interface LayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export default function Layout({ children, showMobileFooter = true }: LayoutProp
         {children}
       </main>
       {showMobileFooter && <MobileFooter />}
+      <SaraChatbot />
     </div>
   );
 }

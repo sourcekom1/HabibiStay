@@ -117,6 +117,14 @@ export default function AdminPanel() {
                 <h1 className="text-3xl font-bold gradient-text">Admin Panel</h1>
               </div>
             </div>
+            <div className="flex items-center space-x-3">
+              <Button
+                onClick={() => window.location.href = '/admin/ai-settings'}
+                className="glass-button px-4 py-2 rounded-2xl transition-all duration-300 hover:scale-105 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                🤖 AI Settings
+              </Button>
+            </div>
           </div>
         </div>
       </div>
