@@ -69,14 +69,8 @@ app.use((req, res, next) => {
     
     const server = await registerRoutes(app);
 
-    // Global error handler
-    app.use(globalErrorHandler);
-    
-    // 404 handler
-    app.use(notFoundHandler);
-
     // Setup Vite in development or serve static files in production
-    if (app.get("env") === "development") {
+    if (process.env.NODE_ENV === "development") {
       await setupVite(app, server);
     } else {
       serveStatic(app);
