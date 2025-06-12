@@ -97,39 +97,39 @@ export default function HeroSection() {
         </div>
       </div>
       {/* Enhanced Glass Search Bar */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-6xl mx-auto px-4">
-        <form onSubmit={handleSearch} className="glass-search rounded-3xl p-4 animate-slide-up ml-[45px] mr-[45px] mt-[10px] mb-[10px] pt-[0px] pb-[0px] pl-[51px] pr-[51px] text-center" style={{ animationDelay: '0.3s' }}>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
             {/* Where */}
-            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20">
+            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
               <div className="flex items-center mb-2">
-                <MapPin className="h-4 w-4 text-brand-blue mr-2" />
-                <Label htmlFor="search-where" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Where</Label>
+                <MapPin className="h-5 w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-where" className="text-sm font-semibold text-white/90">Where</Label>
               </div>
               <Input
                 id="search-where"
                 type="text"
-                placeholder="Search destinations"
+                placeholder="Riyadh, Jeddah, AlUla..."
                 value={searchData.where}
                 onChange={(e) => handleInputChange("where", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-white/60 text-white font-medium"
                 required
                 aria-label="Enter destination"
               />
             </div>
 
             {/* Check in */}
-            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
+            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
               <div className="flex items-center mb-2">
-                <Calendar className="h-4 w-4 text-brand-blue mr-2" />
-                <Label htmlFor="search-checkin" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check in</Label>
+                <Calendar className="h-5 w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-checkin" className="text-sm font-semibold text-white/90">Check in</Label>
               </div>
               <Input
                 id="search-checkin"
                 type="date"
                 value={searchData.checkIn}
                 onChange={(e) => handleInputChange("checkIn", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none font-medium"
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none text-white font-medium"
                 required
                 aria-label="Select check-in date"
                 min={new Date().toISOString().split('T')[0]}
@@ -137,17 +137,17 @@ export default function HeroSection() {
             </div>
 
             {/* Check out */}
-            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
+            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
               <div className="flex items-center mb-2">
-                <Calendar className="h-4 w-4 text-brand-blue mr-2" />
-                <Label htmlFor="search-checkout" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Check out</Label>
+                <Calendar className="h-5 w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-checkout" className="text-sm font-semibold text-white/90">Check out</Label>
               </div>
               <Input
                 id="search-checkout"
                 type="date"
                 value={searchData.checkOut}
                 onChange={(e) => handleInputChange("checkOut", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none font-medium"
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none text-white font-medium"
                 required
                 aria-label="Select check-out date"
                 min={searchData.checkIn || new Date().toISOString().split('T')[0]}
@@ -155,33 +155,34 @@ export default function HeroSection() {
             </div>
 
             {/* Guests */}
-            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
+            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
               <div className="flex items-center mb-2">
-                <Users className="h-4 w-4 text-brand-blue mr-2" />
-                <Label htmlFor="search-guests" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Who</Label>
+                <Users className="h-5 w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-guests" className="text-sm font-semibold text-white/90">Guests</Label>
               </div>
               <Input
                 id="search-guests"
                 type="number"
-                placeholder="Add guests"
+                placeholder="2 guests"
                 min="1"
                 max="20"
                 value={searchData.guests}
                 onChange={(e) => handleInputChange("guests", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-white/60 text-white font-medium"
                 aria-label="Number of guests"
               />
             </div>
 
             {/* Search Button */}
-            <div className="flex items-center justify-center px-4 py-4">
+            <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex items-center justify-center">
               <Button
                 type="submit"
-                className="w-full h-14 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 bg-brand-blue text-white hover:bg-brand-blue-dark pulse-glow font-semibold"
+                className="w-full h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 text-white font-semibold backdrop-blur-sm border border-blue-400/30"
                 aria-label="Search properties"
               >
                 <Search className="h-6 w-6 mr-2" />
-                Search
+                <span className="hidden sm:inline">Search</span>
+                <span className="sm:hidden">Find</span>
               </Button>
             </div>
           </div>
