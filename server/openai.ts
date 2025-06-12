@@ -1,12 +1,8 @@
 import OpenAI from "openai";
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY environment variable is required");
-}
-
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+const openai = process.env.OPENAI_API_KEY 
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const MODEL = "gpt-4o";
@@ -23,6 +19,13 @@ export async function generateChatResponse(
   messageType: string;
   metadata?: any;
 }> {
+  if (!openai) {
+    return {
+      message: "I'm currently unavailable. Our AI assistant requires proper configuration. Please contact support for assistance.",
+      messageType: "error"
+    };
+  }
+
   try {
     const systemPrompt = `You are Sara, HabibiStay's AI assistant. You help users with:
 - Booking luxury stays in Riyadh
@@ -92,6 +95,14 @@ export async function analyzeUserIntent(message: string): Promise<{
   entities: any;
   confidence: number;
 }> {
+  if (!openai) {
+    return {
+      intent: "general",
+      entities: {},
+      confidence: 0.5
+    };
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: MODEL,

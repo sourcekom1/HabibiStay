@@ -51,32 +51,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Search properties endpoint
-  app.get('/api/properties/search', async (req, res) => {
-    try {
-      const { location, checkIn, checkOut, guests } = req.query;
-      
-      const filters = {
-        location: location as string,
-        checkIn: checkIn ? new Date(checkIn as string) : undefined,
-        checkOut: checkOut ? new Date(checkOut as string) : undefined,
-        guests: guests ? parseInt(guests as string) : undefined
-      };
-      
-      const properties = await storage.searchProperties(filters);
-      res.json(properties);
-    } catch (error) {
-      console.error("Error searching properties:", error);
-      res.status(500).json({ message: "Failed to search properties" });
-    }
-  });
-
   app.get('/api/properties/:id', async (req, res) => {
     try {
-      const property = await storage.getProperty(parseInt(req.params.id));
+      const propertyId = parseInt(req.params.id);
+      const property = await storage.getProperty(propertyId);
+      
       if (!property) {
         return res.status(404).json({ message: "Property not found" });
       }
+      
       res.json(property);
     } catch (error) {
       console.error("Error fetching property:", error);
@@ -241,12 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PayPal payment routes
-  app.get('/setup', loadPaypalDefault);
-  app.post('/order', createPaypalOrder);
-  app.post('/order/:orderID/capture', capturePaypalOrder);
-
-  // Chat routes
+  // Chat routes for Sara AI assistant
   app.get('/api/chat/:sessionId', async (req, res) => {
     try {
       const { sessionId } = req.params;
@@ -357,51 +335,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
-}
-
-// Simple AI response generator for Sara chatbot
-async function generateBotResponse(userMessage: string): Promise<{
-  message: string;
-  type: string;
-  metadata?: any;
-}> {
-  const message = userMessage.toLowerCase();
-  
-  if (message.includes('beach') || message.includes('ocean') || message.includes('sea')) {
-    return {
-      message: "I found some beautiful beachfront properties! Our Ocean View Villa in the Maldives is very popular. Would you like to see more details or check availability?",
-      type: "property_suggestion",
-      metadata: { suggestedPropertyType: "beachfront" }
-    };
-  }
-  
-  if (message.includes('mountain') || message.includes('cabin') || message.includes('ski')) {
-    return {
-      message: "Perfect! I have some amazing mountain retreats. Our Mountain Cabin in Aspen has stunning alpine views. Would you like to see the details or explore similar properties?",
-      type: "property_suggestion",
-      metadata: { suggestedPropertyType: "mountain" }
-    };
-  }
-  
-  if (message.includes('book') || message.includes('reserve') || message.includes('available')) {
-    return {
-      message: "I'd be happy to help you with booking! To check availability and make a reservation, I'll need to know your preferred dates and number of guests. Which property interests you?",
-      type: "booking_action",
-      metadata: { action: "booking_inquiry" }
-    };
-  }
-  
-  if (message.includes('price') || message.includes('cost') || message.includes('expensive')) {
-    return {
-      message: "Our properties range from $150 to $450 per night. I can help you find options within your budget. What's your preferred price range?",
-      type: "text",
-      metadata: { topic: "pricing" }
-    };
-  }
-  
-  return {
-    message: "Hi! I'm Sara, your travel assistant. I can help you find the perfect accommodation, check availability, make bookings, and answer any questions about our properties. What are you looking for today?",
-    type: "text",
-    metadata: { topic: "general" }
-  };
 }
