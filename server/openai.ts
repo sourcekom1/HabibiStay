@@ -41,9 +41,12 @@ ${context?.properties ? `Available properties: ${JSON.stringify(context.properti
 `;
 
     const messages = [
-      { role: "system", content: systemPrompt },
-      ...(context?.previousMessages || []).slice(-5), // Keep last 5 messages for context
-      { role: "user", content: userMessage }
+      { role: "system" as const, content: systemPrompt },
+      ...(context?.previousMessages || []).slice(-5).map(msg => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content
+      })),
+      { role: "user" as const, content: userMessage }
     ];
 
     const response = await openai.chat.completions.create({

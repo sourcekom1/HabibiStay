@@ -2,13 +2,17 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
+import { generateChatResponse, analyzeUserIntent } from "./openai";
+import { smsService, smsTemplates } from "./sms";
 import { 
-  insertPropertySchema, 
+  insertPropertySchema,
   insertBookingSchema, 
-  insertReviewSchema,
-  insertChatMessageSchema 
+  insertPaymentSchema, 
+  insertChatMessageSchema, 
+  insertSmsNotificationSchema,
+  insertReviewSchema
 } from "@shared/schema";
+import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {

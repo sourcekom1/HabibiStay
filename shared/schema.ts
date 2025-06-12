@@ -96,15 +96,15 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Payments table for Stripe transactions
+// Payments table for PayPal transactions
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
   bookingId: integer("booking_id").notNull().references(() => bookings.id),
-  stripePaymentIntentId: varchar("stripe_payment_intent_id").unique(),
+  paypalOrderId: varchar("paypal_order_id").unique(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: varchar("currency").default("USD"),
-  status: varchar("status").default("pending"), // pending, succeeded, failed, cancelled
-  paymentMethod: varchar("payment_method").default("card"), // card, paypal
+  status: varchar("status").default("pending"), // pending, completed, failed, cancelled
+  paymentMethod: varchar("payment_method").default("paypal"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
