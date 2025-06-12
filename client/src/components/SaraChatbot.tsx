@@ -314,7 +314,7 @@ How can I help you find the perfect stay today?`;
           {/* Quick Action Buttons */}
           <div className="p-4 border-t border-gray-200">
             <div className="mb-3">
-              <p className="text-xs text-gray-500 mb-2">Quick actions:</p>
+              <div className="text-xs text-gray-500 mb-2">Quick actions:</div>
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   size="sm"

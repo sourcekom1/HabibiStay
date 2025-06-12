@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, MapPin, Calendar, Users } from "lucide-react";
+import { Search, MapPin, Calendar, Users, Loader2 } from "lucide-react";
 
 export default function HeroSection() {
   const [, setLocation] = useLocation();
@@ -14,13 +14,20 @@ export default function HeroSection() {
     guests: "1"
   });
   const [isVisible, setIsVisible] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
-  const handleSearch = (e?: React.FormEvent) => {
+  const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    
+    setIsSearching(true);
+    
+    // Add a brief delay for better UX feedback
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     if (!searchData.where) {
       // If no location specified, default to Riyadh
@@ -35,12 +42,18 @@ export default function HeroSection() {
     });
     
     setLocation(`/search?${searchParams.toString()}`);
+    setIsSearching(false);
   };
 
   const isFormValid = true; // Allow search with any input
 
   const handleInputChange = (field: string, value: string) => {
     setSearchData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear validation errors when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({ ...prev, [field]: "" }));
+    }
   };
 
   return (
@@ -174,12 +187,23 @@ export default function HeroSection() {
             <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex items-center justify-center lg:items-stretch">
               <Button
                 type="submit"
-                className="w-full h-12 sm:h-14 lg:h-auto glass-button bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 text-white font-semibold border-2 border-blue-400/30 backdrop-blur-sm"
+                disabled={isSearching}
+                className="w-full h-12 sm:h-14 lg:h-auto glass-button bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-blue-400 disabled:to-blue-500 rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:scale-100 text-white font-semibold border-2 border-blue-400/30 backdrop-blur-sm disabled:cursor-not-allowed"
                 aria-label="Search properties"
               >
-                <Search className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
-                <span className="hidden sm:inline text-base sm:text-lg font-semibold">Search</span>
-                <span className="sm:hidden text-sm font-semibold">Find</span>
+                {isSearching ? (
+                  <>
+                    <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 mr-2 animate-spin" />
+                    <span className="hidden sm:inline text-base sm:text-lg font-semibold">Searching...</span>
+                    <span className="sm:hidden text-sm font-semibold">Searching</span>
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                    <span className="hidden sm:inline text-base sm:text-lg font-semibold">Search</span>
+                    <span className="sm:hidden text-sm font-semibold">Find</span>
+                  </>
+                )}
               </Button>
             </div>
           </div>
