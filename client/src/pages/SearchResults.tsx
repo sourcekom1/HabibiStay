@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { useAnalytics } from "@/hooks/useAnalytics";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,9 +23,14 @@ import {
   Waves,
   Mountain,
   ArrowLeft,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Share2,
+  Eye
 } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
+import EnhancedSearchFilters from "@/components/EnhancedSearchFilters";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { formatSAR } from "@shared/currency";
 
 interface Property {
   id: number;
@@ -42,16 +50,27 @@ interface Property {
 
 export default function SearchResults() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const { trackSearchPerformed, trackPropertyView, trackFavoriteAction } = useAnalytics();
+  const { toast } = useToast();
   const [searchParams] = useState(() => new URLSearchParams(window.location.search));
   const [filters, setFilters] = useState({
-    priceRange: [0, 1000],
+    location: searchParams.get('location') || '',
+    checkIn: searchParams.get('checkIn') || '',
+    checkOut: searchParams.get('checkOut') || '',
+    guests: (() => {
+      const guestParam = searchParams.get('guests');
+      if (!guestParam || guestParam === 'NaN' || guestParam === '') return 1;
+      const parsed = parseInt(guestParam);
+      return !isNaN(parsed) && parsed > 0 ? parsed : 1;
+    })(),
+    minPrice: 0,
+    maxPrice: 2000,
     propertyType: "",
     amenities: [] as string[],
-    rating: 0
   });
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   const location = searchParams.get('location') || '';
@@ -68,21 +87,85 @@ export default function SearchResults() {
     setIsVisible(true);
   }, []);
 
-  const { data: properties = [], isLoading } = useQuery<Property[]>({
-    queryKey: ['/api/search', location, checkIn, checkOut, guests, filters],
+  // Fetch search results
+  const { data: properties = [], isLoading, refetch } = useQuery<Property[]>({
+    queryKey: ['/api/search', filters],
     queryFn: async () => {
-      const response = await fetch(`/api/search?${searchParams.toString()}`);
+      const params = new URLSearchParams();
+      if (filters.location) params.set('location', filters.location);
+      if (filters.checkIn) params.set('checkIn', filters.checkIn);
+      if (filters.checkOut) params.set('checkOut', filters.checkOut);
+      if (filters.guests) params.set('guests', filters.guests.toString());
+      if (filters.minPrice) params.set('minPrice', filters.minPrice.toString());
+      if (filters.maxPrice) params.set('maxPrice', filters.maxPrice.toString());
+      if (filters.propertyType) params.set('propertyType', filters.propertyType);
+      if (filters.amenities.length > 0) params.set('amenities', filters.amenities.join(','));
+
+      const response = await fetch(`/api/search?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch properties');
-      return response.json();
+      const results = await response.json();
+      
+      // Track search analytics
+      trackSearchPerformed(filters, results.length, user?.id);
+      
+      return results;
     }
   });
 
+  // Fetch user favorites
+  const { data: userFavorites = [] } = useQuery<Property[]>({
+    queryKey: ['/api/favorites'],
+    enabled: !!user,
+  });
+
+  const favoriteIds = new Set(userFavorites.map(p => p.id));
+
+  // Favorites mutations
+  const addToFavoritesMutation = useMutation({
+    mutationFn: async (propertyId: number) => {
+      const response = await apiRequest("POST", "/api/favorites", { propertyId });
+      return response.json();
+    },
+    onSuccess: (_, propertyId) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
+      trackFavoriteAction(propertyId, 'add', user?.id);
+      toast({
+        title: "Added to favorites",
+        description: "Property has been saved to your favorites.",
+      });
+    },
+  });
+
+  const removeFromFavoritesMutation = useMutation({
+    mutationFn: async (propertyId: number) => {
+      const response = await apiRequest("DELETE", `/api/favorites/${propertyId}`);
+      return response.json();
+    },
+    onSuccess: (_, propertyId) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
+      trackFavoriteAction(propertyId, 'remove', user?.id);
+      toast({
+        title: "Removed from favorites",
+        description: "Property has been removed from your favorites.",
+      });
+    },
+  });
+
   const toggleFavorite = (propertyId: number) => {
-    setFavorites(prev => 
-      prev.includes(propertyId) 
-        ? prev.filter(id => id !== propertyId)
-        : [...prev, propertyId]
-    );
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save favorites.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (favoriteIds.has(propertyId)) {
+      removeFromFavoritesMutation.mutate(propertyId);
+    } else {
+      addToFavoritesMutation.mutate(propertyId);
+    }
   };
 
   const amenityIcons: { [key: string]: any } = {
@@ -94,12 +177,11 @@ export default function SearchResults() {
   };
 
   const filteredProperties = properties.filter(property => {
-    const matchesPrice = property.pricePerNight >= filters.priceRange[0] && 
-                        property.pricePerNight <= filters.priceRange[1];
-    const matchesRating = property.rating >= filters.rating;
-    const matchesGuests = property.maxGuests >= guests;
+    const matchesPrice = parseFloat(property.pricePerNight) >= filters.minPrice && 
+                        parseFloat(property.pricePerNight) <= filters.maxPrice;
+    const matchesGuests = property.maxGuests >= filters.guests;
     
-    return matchesPrice && matchesRating && matchesGuests;
+    return matchesPrice && matchesGuests;
   });
 
   if (isLoading) {
@@ -144,12 +226,12 @@ export default function SearchResults() {
               </div>
             </div>
             <Button
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
               variant="outline"
               className="glass-button rounded-2xl"
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filters
+              Advanced Filters
             </Button>
           </div>
         </div>

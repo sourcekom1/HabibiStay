@@ -191,15 +191,27 @@ export class DatabaseStorage implements IStorage {
     checkIn?: Date;
     checkOut?: Date;
     guests?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    propertyType?: string;
+    amenities?: string[];
   }): Promise<Property[]> {
     let conditions = [eq(properties.isActive, true)];
     
     if (filters.location) {
-      conditions.push(eq(properties.location, filters.location));
+      conditions.push(ilike(properties.location, `%${filters.location}%`));
     }
     
     if (filters.guests) {
       conditions.push(gte(properties.maxGuests, filters.guests));
+    }
+    
+    if (filters.minPrice) {
+      conditions.push(gte(properties.pricePerNight, filters.minPrice.toString()));
+    }
+    
+    if (filters.maxPrice) {
+      conditions.push(lte(properties.pricePerNight, filters.maxPrice.toString()));
     }
     
     return db.select().from(properties)
