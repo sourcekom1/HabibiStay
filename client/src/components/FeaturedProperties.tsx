@@ -77,9 +77,9 @@ export default function FeaturedProperties() {
         <div className="bg-orb w-32 h-32 bottom-0 left-10 opacity-15" style={{ animationDelay: '7s' }}></div>
 
         <div className={`text-center mb-12 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
-          <h2 className="text-4xl md:text-5xl font-bold gradient-text mb-6">Featured Properties</h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Handpicked accommodations for your perfect getaway
+          <h2 className="text-4xl md:text-5xl font-bold gradient-text mb-6">Discover Saudi Arabia</h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            From Riyadh's gleaming towers to Jeddah's historic coral houses, AlUla's ancient Nabatean tombs to the Red Sea's pristine beaches - experience the Kingdom's diverse beauty through carefully curated stays.
           </p>
         </div>
 

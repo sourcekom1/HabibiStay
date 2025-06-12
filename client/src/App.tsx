@@ -13,6 +13,9 @@ import BecomeHost from "@/pages/BecomeHost";
 import About from "@/pages/About";
 import Invest from "@/pages/Invest";
 import Contact from "@/pages/Contact";
+import TermsOfService from "@/pages/TermsOfService";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import FAQ from "@/pages/FAQ";
 import NotFound from "@/pages/not-found";
 import FavoritesPage from "@/components/FavoritesPage";
 
@@ -39,6 +42,9 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/become-host" component={BecomeHost} />
           <Route path="/host" component={HostDashboard} />
+          <Route path="/terms" component={TermsOfService} />
+          <Route path="/privacy" component={PrivacyPolicy} />
+          <Route path="/faq" component={FAQ} />
         </>
       ) : (
         <>
@@ -49,6 +55,9 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/become-host" component={BecomeHost} />
           <Route path="/host" component={HostDashboard} />
+          <Route path="/terms" component={TermsOfService} />
+          <Route path="/privacy" component={PrivacyPolicy} />
+          <Route path="/faq" component={FAQ} />
           <Route path="/admin" component={AdminPanel} />
           <Route path="/favorites" component={FavoritesPage} />
         </>
