@@ -54,6 +54,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/properties/:id', async (req, res) => {
     try {
       const propertyId = parseInt(req.params.id);
+      
+      if (isNaN(propertyId) || propertyId <= 0) {
+        return res.status(400).json({ message: "Invalid property ID" });
+      }
+      
       const property = await storage.getProperty(propertyId);
       
       if (!property) {
@@ -320,11 +325,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/search', async (req, res) => {
     try {
       const { location, checkIn, checkOut, guests } = req.query;
+      
+      // Safely parse guests parameter
+      let parsedGuests: number | undefined;
+      if (guests && guests !== 'NaN' && guests !== '') {
+        const guestNum = parseInt(guests as string);
+        parsedGuests = !isNaN(guestNum) && guestNum > 0 ? guestNum : undefined;
+      }
+      
       const properties = await storage.searchProperties({
         location: location as string,
         checkIn: checkIn ? new Date(checkIn as string) : undefined,
         checkOut: checkOut ? new Date(checkOut as string) : undefined,
-        guests: guests ? parseInt(guests as string) : undefined
+        guests: parsedGuests
       });
       res.json(properties);
     } catch (error) {

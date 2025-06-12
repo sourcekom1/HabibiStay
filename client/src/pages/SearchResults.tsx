@@ -57,16 +57,21 @@ export default function SearchResults() {
   const location = searchParams.get('location') || '';
   const checkIn = searchParams.get('checkIn') || '';
   const checkOut = searchParams.get('checkOut') || '';
-  const guests = parseInt(searchParams.get('guests') || '1');
+  const guests = (() => {
+    const guestParam = searchParams.get('guests');
+    if (!guestParam || guestParam === 'NaN' || guestParam === '') return 1;
+    const parsed = parseInt(guestParam);
+    return !isNaN(parsed) && parsed > 0 ? parsed : 1;
+  })();
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   const { data: properties = [], isLoading } = useQuery<Property[]>({
-    queryKey: ['/api/properties/search', location, checkIn, checkOut, guests, filters],
+    queryKey: ['/api/search', location, checkIn, checkOut, guests, filters],
     queryFn: async () => {
-      const response = await fetch(`/api/properties/search?${searchParams.toString()}`);
+      const response = await fetch(`/api/search?${searchParams.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch properties');
       return response.json();
     }
