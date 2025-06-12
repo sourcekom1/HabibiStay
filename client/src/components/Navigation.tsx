@@ -54,17 +54,18 @@ export default function Navigation() {
               <Link href="/" className="glass-button px-4 py-2 rounded-2xl text-brand-blue hover:text-white font-semibold transition-all duration-300 hover:scale-105">
                 Home
               </Link>
-              <a 
-                href="#experiences" 
-                className="glass-button px-4 py-2 rounded-2xl text-gray-700 dark:text-gray-200 hover:text-brand-blue font-medium transition-all duration-300 hover:scale-105"
-              >
-                Experiences
-              </a>
-              {isAuthenticated && user?.userType === 'host' && (
-                <Link href="/host" className="glass-button px-4 py-2 rounded-2xl text-gray-700 dark:text-gray-200 hover:text-brand-blue font-medium transition-all duration-300 hover:scale-105">
-                  Host Dashboard
-                </Link>
-              )}
+              <Link href="/search?location=Riyadh" className="glass-button px-4 py-2 rounded-2xl text-gray-700 dark:text-gray-200 hover:text-brand-blue font-medium transition-all duration-300 hover:scale-105">
+                Stays
+              </Link>
+              <Link href="/host" className="glass-button px-4 py-2 rounded-2xl text-gray-700 dark:text-gray-200 hover:text-brand-blue font-medium transition-all duration-300 hover:scale-105">
+                Owners
+              </Link>
+              <Link href="/invest" className="glass-button px-4 py-2 rounded-2xl text-gray-700 dark:text-gray-200 hover:text-brand-blue font-medium transition-all duration-300 hover:scale-105">
+                Invest
+              </Link>
+              <Link href="/about" className="glass-button px-4 py-2 rounded-2xl text-gray-700 dark:text-gray-200 hover:text-brand-blue font-medium transition-all duration-300 hover:scale-105">
+                About
+              </Link>
             </div>
           </div>
 

@@ -9,6 +9,8 @@ import Home from "@/pages/Home";
 import SearchResults from "@/pages/SearchResults";
 import HostDashboard from "@/pages/HostDashboard";
 import AdminPanel from "@/pages/AdminPanel";
+import About from "@/pages/About";
+import Invest from "@/pages/Invest";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -29,11 +31,16 @@ function Router() {
         <>
           <Route path="/" component={Landing} />
           <Route path="/search" component={SearchResults} />
+          <Route path="/about" component={About} />
+          <Route path="/invest" component={Invest} />
+          <Route path="/host" component={HostDashboard} />
         </>
       ) : (
         <>
           <Route path="/" component={Home} />
           <Route path="/search" component={SearchResults} />
+          <Route path="/about" component={About} />
+          <Route path="/invest" component={Invest} />
           <Route path="/host" component={HostDashboard} />
           <Route path="/admin" component={AdminPanel} />
         </>
