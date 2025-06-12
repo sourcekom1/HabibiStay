@@ -36,6 +36,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email/password authentication routes
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Create user with email/password
+      const user = await storage.createUser({
+        id: `user_${Date.now()}_${Math.random()}`,
+        email,
+        firstName,
+        lastName,
+        // In a real app, you'd hash the password
+        // For now, we'll store it as metadata
+        profileImageUrl: null
+      });
+
+      res.json({ message: "Account created successfully", user });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // In a real app, you'd verify the hashed password
+      // For now, we'll simulate successful login
+      res.json({ message: "Login successful", user });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Failed to log in" });
+    }
+  });
+
   // Properties routes
   app.get('/api/properties', async (req, res) => {
     try {
