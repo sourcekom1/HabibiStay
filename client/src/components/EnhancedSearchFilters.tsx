@@ -152,33 +152,44 @@ export default function EnhancedSearchFilters({
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="checkIn">Check-in Date</Label>
-              <Input
-                id="checkIn"
-                type="date"
-                value={localFilters.checkIn}
-                onChange={(e) => updateFilter('checkIn', e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <div>
-              <Label htmlFor="checkOut">Check-out Date</Label>
-              <Input
-                id="checkOut"
-                type="date"
-                value={localFilters.checkOut}
-                onChange={(e) => updateFilter('checkOut', e.target.value)}
-                min={localFilters.checkIn || new Date().toISOString().split('T')[0]}
-              />
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              Travel Dates
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="checkIn" className="text-sm font-medium text-gray-700 dark:text-gray-300">Check-in Date</Label>
+                <Input
+                  id="checkIn"
+                  type="date"
+                  value={localFilters.checkIn}
+                  onChange={(e) => updateFilter('checkIn', e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="glass-input h-11 rounded-xl border-2 border-white/20 bg-white/70 backdrop-blur-sm focus:border-blue-400 focus:bg-white/80 transition-all duration-200"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="checkOut" className="text-sm font-medium text-gray-700 dark:text-gray-300">Check-out Date</Label>
+                <Input
+                  id="checkOut"
+                  type="date"
+                  value={localFilters.checkOut}
+                  onChange={(e) => updateFilter('checkOut', e.target.value)}
+                  min={localFilters.checkIn || new Date().toISOString().split('T')[0]}
+                  className="glass-input h-11 rounded-xl border-2 border-white/20 bg-white/70 backdrop-blur-sm focus:border-blue-400 focus:bg-white/80 transition-all duration-200"
+                />
+              </div>
             </div>
           </div>
 
           {/* Price Range */}
-          <div>
-            <Label>Price Range (SAR per night)</Label>
-            <div className="px-3 py-4">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-blue-600" />
+              Price Range (SAR per night)
+            </h3>
+            <div className="glass-card p-4 rounded-xl border border-white/20 bg-white/60 backdrop-blur-sm">
               <Slider
                 min={0}
                 max={2000}
@@ -190,26 +201,29 @@ export default function EnhancedSearchFilters({
                 }}
                 className="w-full"
               />
-              <div className="flex justify-between mt-2 text-sm text-gray-600">
-                <span>SAR {localFilters.minPrice}</span>
-                <span>SAR {localFilters.maxPrice}</span>
+              <div className="flex justify-between mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="bg-blue-100 dark:bg-blue-900 px-3 py-1 rounded-full">SAR {localFilters.minPrice}</span>
+                <span className="bg-blue-100 dark:bg-blue-900 px-3 py-1 rounded-full">SAR {localFilters.maxPrice}</span>
               </div>
             </div>
           </div>
 
           {/* Property Type */}
-          <div>
-            <Label>Property Type</Label>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <Building className="h-5 w-5 text-blue-600" />
+              Property Type
+            </h3>
             <Select
               value={localFilters.propertyType}
               onValueChange={(value) => updateFilter('propertyType', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="glass-input h-11 rounded-xl border-2 border-white/20 bg-white/70 backdrop-blur-sm focus:border-blue-400 focus:bg-white/80 transition-all duration-200">
                 <SelectValue placeholder="Select property type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="glass-card backdrop-blur-md border border-white/20">
                 {propertyTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
+                  <SelectItem key={type.value} value={type.value} className="hover:bg-white/20">
                     {type.label}
                   </SelectItem>
                 ))}
@@ -218,9 +232,12 @@ export default function EnhancedSearchFilters({
           </div>
 
           {/* Amenities */}
-          <div>
-            <Label>Amenities</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <Star className="h-5 w-5 text-blue-600" />
+              Amenities
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {amenityOptions.map((amenity) => {
                 const Icon = amenity.icon;
                 const isSelected = localFilters.amenities.includes(amenity.id);
@@ -228,19 +245,20 @@ export default function EnhancedSearchFilters({
                 return (
                   <div
                     key={amenity.id}
-                    className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all ${
+                    className={`flex items-center space-x-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105 ${
                       isSelected
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-400 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 shadow-md'
+                        : 'border-white/20 bg-white/60 backdrop-blur-sm hover:border-blue-200 hover:bg-white/80'
                     }`}
                     onClick={() => toggleAmenity(amenity.id)}
                   >
                     <Checkbox
                       checked={isSelected}
                       onChange={() => toggleAmenity(amenity.id)}
+                      className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                     />
-                    <Icon className="h-4 w-4" />
-                    <span className="text-sm font-medium">{amenity.label}</span>
+                    <Icon className={`h-4 w-4 ${isSelected ? 'text-blue-600' : 'text-gray-600'}`} />
+                    <span className="text-sm font-medium flex-1">{amenity.label}</span>
                   </div>
                 );
               })}
@@ -270,11 +288,20 @@ export default function EnhancedSearchFilters({
           )}
 
           {/* Action Buttons */}
-          <div className="flex space-x-3 pt-4">
-            <Button onClick={handleReset} variant="outline" className="flex-1">
+          <div className="flex flex-col sm:flex-row gap-3 pt-6">
+            <Button 
+              onClick={handleReset} 
+              variant="outline" 
+              className="flex-1 h-12 rounded-xl glass-button border-2 border-white/20 bg-white/60 backdrop-blur-sm hover:bg-white/80 transition-all duration-200 hover:scale-105 font-medium"
+            >
+              <X className="h-4 w-4 mr-2" />
               Reset Filters
             </Button>
-            <Button onClick={handleApply} className="flex-1">
+            <Button 
+              onClick={handleApply} 
+              className="flex-1 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            >
+              <Filter className="h-4 w-4 mr-2" />
               Apply Filters
             </Button>
           </div>

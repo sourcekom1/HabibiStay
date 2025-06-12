@@ -98,13 +98,13 @@ export default function HeroSection() {
       </div>
       {/* Enhanced Glass Search Bar */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl animate-slide-up blue-glow" style={{ animationDelay: '0.3s' }}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 items-stretch lg:items-end">
+        <form onSubmit={handleSearch} className="glass-card backdrop-blur-xl border-2 border-white/20 rounded-3xl p-3 sm:p-6 lg:p-8 shadow-2xl animate-slide-up blue-glow" style={{ animationDelay: '0.3s' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 items-stretch">
             {/* Where */}
-            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
+            <div className="group glass-input-container bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:bg-white/15 hover:border-white/30 focus-within:bg-white/20 focus-within:border-blue-300/60 hover:scale-105">
               <div className="flex items-center mb-2">
-                <MapPin className="h-5 w-5 text-blue-300 mr-2" />
-                <Label htmlFor="search-where" className="text-sm font-semibold text-white/90">Where</Label>
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-where" className="text-xs sm:text-sm font-semibold text-white/90">Where</Label>
               </div>
               <Input
                 id="search-where"
@@ -112,25 +112,23 @@ export default function HeroSection() {
                 placeholder="Riyadh, Jeddah, AlUla..."
                 value={searchData.where}
                 onChange={(e) => handleInputChange("where", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-white/60 text-white font-medium"
-                required
+                className="w-full text-sm sm:text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-white/60 text-white font-medium h-6 sm:h-auto"
                 aria-label="Enter destination"
               />
             </div>
 
             {/* Check in */}
-            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
+            <div className="group glass-input-container bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:bg-white/15 hover:border-white/30 focus-within:bg-white/20 focus-within:border-blue-300/60 hover:scale-105">
               <div className="flex items-center mb-2">
-                <Calendar className="h-5 w-5 text-blue-300 mr-2" />
-                <Label htmlFor="search-checkin" className="text-sm font-semibold text-white/90">Check in</Label>
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-checkin" className="text-xs sm:text-sm font-semibold text-white/90">Check in</Label>
               </div>
               <Input
                 id="search-checkin"
                 type="date"
                 value={searchData.checkIn}
                 onChange={(e) => handleInputChange("checkIn", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none text-white font-medium"
-                required
+                className="w-full text-sm sm:text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none text-white font-medium h-6 sm:h-auto"
                 aria-label="Select check-in date"
                 min={new Date().toISOString().split('T')[0]}
               />
