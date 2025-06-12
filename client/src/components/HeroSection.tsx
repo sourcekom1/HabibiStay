@@ -100,8 +100,8 @@ export default function HeroSection() {
 
       {/* Enhanced Glass Search Bar */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-6xl mx-auto px-4">
-        <form onSubmit={handleSearch} className={`glass-search rounded-3xl p-3 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <form onSubmit={handleSearch} className={`glass-search rounded-3xl p-4 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
             {/* Where */}
             <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20">
               <div className="flex items-center mb-2">
@@ -156,32 +156,34 @@ export default function HeroSection() {
               />
             </div>
 
-            {/* Guests and Search */}
-            <div className="flex items-center px-6 py-4 border-l border-gray-200/30">
-              <div className="flex-1">
-                <div className="flex items-center mb-2">
-                  <Users className="h-4 w-4 text-brand-blue mr-2" />
-                  <Label htmlFor="search-guests" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Who</Label>
-                </div>
-                <Input
-                  id="search-guests"
-                  type="number"
-                  placeholder="Add guests"
-                  min="1"
-                  max="20"
-                  value={searchData.guests}
-                  onChange={(e) => handleInputChange("guests", e.target.value)}
-                  className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
-                  aria-label="Number of guests"
-                />
+            {/* Guests */}
+            <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20 border-l border-gray-200/30">
+              <div className="flex items-center mb-2">
+                <Users className="h-4 w-4 text-brand-blue mr-2" />
+                <Label htmlFor="search-guests" className="text-sm font-semibold text-gray-700 dark:text-gray-200">Who</Label>
               </div>
+              <Input
+                id="search-guests"
+                type="number"
+                placeholder="Add guests"
+                min="1"
+                max="20"
+                value={searchData.guests}
+                onChange={(e) => handleInputChange("guests", e.target.value)}
+                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-gray-500 font-medium"
+                aria-label="Number of guests"
+              />
+            </div>
+
+            {/* Search Button */}
+            <div className="flex items-center justify-center px-4 py-4">
               <Button
                 type="submit"
-                className="p-4 rounded-2xl transition-all duration-300 ml-4 shadow-lg hover:shadow-xl transform hover:scale-105 bg-brand-blue text-white hover:bg-brand-blue-dark pulse-glow"
+                className="w-full h-14 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 bg-brand-blue text-white hover:bg-brand-blue-dark pulse-glow font-semibold"
                 aria-label="Search properties"
-                size="lg"
               >
-                <Search className="h-5 w-5" />
+                <Search className="h-6 w-6 mr-2" />
+                Search
               </Button>
             </div>
           </div>
