@@ -17,6 +17,7 @@ import {
   Share2,
   Eye
 } from "lucide-react";
+import Layout from "./Layout";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatSAR } from "@shared/currency";
 import BookingModal from "./BookingModal";
@@ -97,14 +98,16 @@ export default function FavoritesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-blue"></div>
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-blue"></div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <div className="flex items-center justify-between mb-8">
@@ -254,6 +257,6 @@ export default function FavoritesPage() {
           onClose={() => setSelectedProperty(null)}
         />
       )}
-    </div>
+    </Layout>
   );
 }

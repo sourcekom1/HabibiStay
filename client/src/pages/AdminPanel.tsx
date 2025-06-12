@@ -383,6 +383,6 @@ export default function AdminPanel() {
           </Tabs>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
