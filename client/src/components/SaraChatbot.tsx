@@ -193,7 +193,7 @@ How can I help you find the perfect stay today?`;
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className={`${chatWindowClass} ${isFullScreen ? '' : 'absolute bottom-0 right-0'} 
+        <Card className={`${chatWindowClass} ${isFullScreen ? 'rounded-none' : 'absolute bottom-0 right-0 rounded-2xl'} 
           flex flex-col transition-all duration-500 ease-out animate-in slide-in-from-bottom-4`}>
           {/* Enhanced Glass Morphism Header */}
           <CardHeader className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white p-4 rounded-t-lg relative overflow-hidden">
