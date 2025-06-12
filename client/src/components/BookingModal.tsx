@@ -14,9 +14,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import { Lock, Info, Calendar, Users, CreditCard, MapPin, Star, User } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Lock, Info, Calendar, Users, CreditCard, MapPin, Star, User, CheckCircle, AlertCircle, Clock, Shield, Wifi, Car, Coffee } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { formatSAR } from "@shared/currency";
+import PayPalButton from "./PayPalButton";
 
 interface BookingModalProps {
   property: any;
@@ -28,16 +32,26 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(false);
+  const [step, setStep] = useState(1);
   const [bookingData, setBookingData] = useState({
     checkIn: "",
     checkOut: "",
     guests: 2,
-    firstName: "",
-    lastName: "",
-    email: "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
     phone: "",
-    paymentMethod: "card"
+    specialRequests: "",
+    paymentMethod: "paypal"
   });
+  const [pricing, setPricing] = useState({
+    basePrice: 0,
+    serviceFee: 0,
+    cleaningFee: 50,
+    taxes: 0,
+    total: 0
+  });
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   useEffect(() => {
     if (isOpen) {

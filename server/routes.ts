@@ -42,6 +42,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search properties endpoint
+  app.get('/api/properties/search', async (req, res) => {
+    try {
+      const { location, checkIn, checkOut, guests } = req.query;
+      
+      const filters = {
+        location: location as string,
+        checkIn: checkIn ? new Date(checkIn as string) : undefined,
+        checkOut: checkOut ? new Date(checkOut as string) : undefined,
+        guests: guests ? parseInt(guests as string) : undefined
+      };
+      
+      const properties = await storage.searchProperties(filters);
+      res.json(properties);
+    } catch (error) {
+      console.error("Error searching properties:", error);
+      res.status(500).json({ message: "Failed to search properties" });
+    }
+  });
+
   app.get('/api/properties/:id', async (req, res) => {
     try {
       const property = await storage.getProperty(parseInt(req.params.id));
