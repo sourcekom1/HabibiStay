@@ -124,6 +124,49 @@ export const smsNotifications = pgTable("sms_notifications", {
   sentAt: timestamp("sent_at"),
 });
 
+// Notifications table for real-time updates
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: varchar("type").notNull(), // booking, payment, review, system
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  data: jsonb("data"),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Analytics table for tracking user behavior
+export const analytics = pgTable("analytics", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  eventType: varchar("event_type").notNull(), // search, view, book, click
+  eventData: jsonb("event_data"),
+  sessionId: varchar("session_id"),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Wishlist/Favorites table
+export const favorites = pgTable("favorites", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  propertyId: integer("property_id").notNull().references(() => properties.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Property availability calendar
+export const availability = pgTable("availability", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull().references(() => properties.id),
+  date: timestamp("date").notNull(),
+  isAvailable: boolean("is_available").default(true),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  minimumStay: integer("minimum_stay").default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -166,6 +209,26 @@ export const insertSmsNotificationSchema = createInsertSchema(smsNotifications).
   sentAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAnalyticsSchema = createInsertSchema(analytics).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertFavoriteSchema = createInsertSchema(favorites).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAvailabilitySchema = createInsertSchema(availability).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -181,3 +244,11 @@ export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Payment = typeof payments.$inferSelect;
 export type InsertSmsNotification = z.infer<typeof insertSmsNotificationSchema>;
 export type SmsNotification = typeof smsNotifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertAnalytics = z.infer<typeof insertAnalyticsSchema>;
+export type Analytics = typeof analytics.$inferSelect;
+export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertAvailability = z.infer<typeof insertAvailabilitySchema>;
+export type Availability = typeof availability.$inferSelect;
