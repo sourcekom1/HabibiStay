@@ -19,22 +19,25 @@ export default function HeroSection() {
     setIsVisible(true);
   }, []);
 
-  const handleSearch = () => {
-    if (!searchData.where || !searchData.checkIn || !searchData.checkOut) {
-      return;
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    if (!searchData.where) {
+      // If no location specified, default to Riyadh
+      setSearchData(prev => ({ ...prev, where: "Riyadh" }));
     }
     
     const searchParams = new URLSearchParams({
-      location: searchData.where,
-      checkIn: searchData.checkIn,
-      checkOut: searchData.checkOut,
+      location: searchData.where || "Riyadh",
+      checkIn: searchData.checkIn || "",
+      checkOut: searchData.checkOut || "",
       guests: searchData.guests || "1"
     });
     
     setLocation(`/search?${searchParams.toString()}`);
   };
 
-  const isFormValid = searchData.where && searchData.checkIn && searchData.checkOut;
+  const isFormValid = true; // Allow search with any input
 
   const handleInputChange = (field: string, value: string) => {
     setSearchData(prev => ({ ...prev, [field]: value }));
@@ -91,7 +94,7 @@ export default function HeroSection() {
 
       {/* Enhanced Glass Search Bar */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-6xl mx-auto px-4">
-        <div className={`glass-search rounded-3xl p-3 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+        <form onSubmit={handleSearch} className={`glass-search rounded-3xl p-3 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
             {/* Where */}
             <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20">
@@ -167,13 +170,8 @@ export default function HeroSection() {
                 />
               </div>
               <Button
-                onClick={handleSearch}
-                disabled={!isFormValid}
-                className={`p-4 rounded-2xl transition-all duration-300 ml-4 shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                  isFormValid 
-                    ? 'bg-brand-blue text-white hover:bg-brand-blue-dark pulse-glow' 
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                type="submit"
+                className="p-4 rounded-2xl transition-all duration-300 ml-4 shadow-lg hover:shadow-xl transform hover:scale-105 bg-brand-blue text-white hover:bg-brand-blue-dark pulse-glow"
                 aria-label="Search properties"
                 size="lg"
               >
@@ -181,7 +179,7 @@ export default function HeroSection() {
               </Button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </section>
   );
