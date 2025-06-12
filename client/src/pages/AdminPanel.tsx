@@ -55,27 +55,31 @@ export default function AdminPanel() {
 
   if (isLoading || usersLoading || statsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass-card p-8 rounded-3xl">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto"></div>
-          <p className="text-center mt-4 text-gray-600 dark:text-gray-300">Loading admin panel...</p>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="glass-card p-8 rounded-3xl">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto"></div>
+            <p className="text-center mt-4 text-gray-600 dark:text-gray-300">Loading admin panel...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (!user || user.userType !== 'admin') {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass-card p-8 rounded-3xl text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <h2 className="text-2xl font-bold gradient-text mb-2">Access Denied</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">You need admin privileges to access this page.</p>
-          <Button onClick={() => window.history.back()} className="glass-button">
-            Go Back
-          </Button>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="glass-card p-8 rounded-3xl text-center">
+            <div className="text-6xl mb-4">🔒</div>
+            <h2 className="text-2xl font-bold gradient-text mb-2">Access Denied</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">You need admin privileges to access this page.</p>
+            <Button onClick={() => window.history.back()} className="glass-button">
+              Go Back
+            </Button>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
@@ -86,7 +90,7 @@ export default function AdminPanel() {
   );
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <Layout>
       {/* Background Orbs */}
       <div className="bg-orb w-72 h-72 top-20 right-20 opacity-10" style={{ animationDelay: '1s' }}></div>
       <div className="bg-orb w-48 h-48 bottom-32 left-32 opacity-15" style={{ animationDelay: '6s' }}></div>
