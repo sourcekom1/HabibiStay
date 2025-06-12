@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import Navigation from "@/components/Navigation";
+import Layout from "@/components/Layout";
 import HeroSection from "@/components/HeroSection";
 import FeaturedProperties from "@/components/FeaturedProperties";
 import InvestorSection from "@/components/InvestorSection";
@@ -10,13 +10,12 @@ export default function Home() {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
+    <Layout>
       <HeroSection />
       <FeaturedProperties />
       {user?.userType === 'host' && <InvestorSection />}
       <Footer />
       <SaraChatbot />
-    </div>
+    </Layout>
   );
 }

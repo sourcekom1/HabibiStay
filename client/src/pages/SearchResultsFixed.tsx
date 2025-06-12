@@ -20,6 +20,7 @@ import {
   Share2,
   Eye
 } from "lucide-react";
+import Layout from "@/components/Layout";
 import BookingModal from "@/components/BookingModal";
 import EnhancedSearchFilters from "@/components/EnhancedSearchFilters";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -184,14 +185,16 @@ export default function SearchResults() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-blue"></div>
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-blue"></div>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Layout>
       {/* Header */}
       <div className="bg-gradient-to-br from-brand-blue via-blue-600 to-purple-700 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -374,6 +377,6 @@ export default function SearchResults() {
           onClose={() => setSelectedProperty(null)}
         />
       )}
-    </div>
+    </Layout>
   );
 }

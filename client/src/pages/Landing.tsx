@@ -1,4 +1,4 @@
-import Navigation from "@/components/Navigation";
+import Layout from "@/components/Layout";
 import HeroSection from "@/components/HeroSection";
 import FeaturedProperties from "@/components/FeaturedProperties";
 import InvestorSection from "@/components/InvestorSection";
@@ -7,13 +7,12 @@ import SaraChatbot from "@/components/SaraChatbot";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
+    <Layout>
       <HeroSection />
       <FeaturedProperties />
       <InvestorSection />
       <Footer />
       <SaraChatbot />
-    </div>
+    </Layout>
   );
 }
