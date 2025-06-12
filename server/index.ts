@@ -2,10 +2,25 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed";
+import { setupSecurity } from "./middleware/security";
+import { requestIdMiddleware, performanceMiddleware, healthCheckMiddleware } from "./middleware/monitoring";
+import { globalErrorHandler, notFoundHandler } from "./utils/errorHandler";
+import { logger } from "./utils/logger";
+import { checkDatabaseHealth, monitorConnectionPool } from "./utils/database";
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Security middleware (must be first)
+setupSecurity(app);
+
+// Request processing middleware
+app.use(requestIdMiddleware);
+app.use(performanceMiddleware);
+app.use(healthCheckMiddleware);
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
