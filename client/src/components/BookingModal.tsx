@@ -72,7 +72,7 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
         checkIn: new Date(data.checkIn),
         checkOut: new Date(data.checkOut),
         guests: data.guests,
-        totalAmount: calculateTotal(),
+        totalAmount: pricing.total,
         guestInfo: {
           firstName: data.firstName,
           lastName: data.lastName,
@@ -98,8 +98,10 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
         lastName: "",
         email: "",
         phone: "",
-        paymentMethod: "card"
+        specialRequests: "",
+        paymentMethod: "paypal"
       });
+      setStep(1);
     },
     onError: (error) => {
       toast({
@@ -110,15 +112,28 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
     },
   });
 
-  const calculateTotal = () => {
-    if (!bookingData.checkIn || !bookingData.checkOut || !property) return 0;
+  const calculatePricing = () => {
+    if (!bookingData.checkIn || !bookingData.checkOut || !property) {
+      return { basePrice: 0, serviceFee: 0, cleaningFee: 50, taxes: 0, total: 0, nights: 0 };
+    }
     
     const checkIn = new Date(bookingData.checkIn);
     const checkOut = new Date(bookingData.checkOut);
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
     
-    return nights * parseFloat(property.pricePerNight || 0);
+    const basePrice = nights * parseFloat(property.pricePerNight || 0);
+    const serviceFee = Math.round(basePrice * 0.14);
+    const cleaningFee = 50;
+    const taxes = Math.round((basePrice + serviceFee + cleaningFee) * 0.12);
+    const total = basePrice + serviceFee + cleaningFee + taxes;
+    
+    return { basePrice, serviceFee, cleaningFee, taxes, total, nights };
   };
+
+  useEffect(() => {
+    const newPricing = calculatePricing();
+    setPricing(newPricing);
+  }, [bookingData.checkIn, bookingData.checkOut, property?.pricePerNight]);
 
   const handleInputChange = (field: string, value: any) => {
     setBookingData(prev => ({ ...prev, [field]: value }));
@@ -139,10 +154,8 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
 
   if (!property) return null;
 
-  const total = calculateTotal();
-  const nights = bookingData.checkIn && bookingData.checkOut 
-    ? Math.ceil((new Date(bookingData.checkOut).getTime() - new Date(bookingData.checkIn).getTime()) / (1000 * 60 * 60 * 24))
-    : 0;
+  const total = pricing.total;
+  const nights = pricing.nights;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
