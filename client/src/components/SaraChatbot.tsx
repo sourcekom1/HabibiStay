@@ -33,7 +33,13 @@ export default function SaraChatbot() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async (messageData: { message: string; sessionId: string; isFromBot: boolean }) => {
+    mutationFn: async (messageData: { 
+      message: string; 
+      sessionId: string; 
+      isFromBot: boolean;
+      messageType?: string;
+      metadata?: any;
+    }) => {
       const response = await apiRequest("POST", "/api/chat", messageData);
       return response.json();
     },
@@ -51,16 +57,39 @@ export default function SaraChatbot() {
     scrollToBottom();
   }, [messages]);
 
-  // Initialize with welcome message if no messages exist
+  // Fetch featured properties for initial display
+  const { data: featuredProperties = [] } = useQuery({
+    queryKey: ['/api/properties', 'featured'],
+    queryFn: () => fetch('/api/properties?featured=true&limit=2').then(res => res.json()),
+    enabled: isOpen
+  });
+
+  // Initialize with welcome message and featured properties if no messages exist
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && featuredProperties.length > 0) {
+      const welcomeMessage = `Hi! I'm Sara, your travel assistant. 🏡 I've found some amazing featured properties for you:
+
+**${featuredProperties[0]?.title}**
+📍 ${featuredProperties[0]?.location}
+💰 $${featuredProperties[0]?.price}/night
+⭐ ${featuredProperties[0]?.rating}/5 (${featuredProperties[0]?.reviews} reviews)
+
+**${featuredProperties[1]?.title}**
+📍 ${featuredProperties[1]?.location}  
+💰 $${featuredProperties[1]?.price}/night
+⭐ ${featuredProperties[1]?.rating}/5 (${featuredProperties[1]?.reviews} reviews)
+
+How can I help you find the perfect stay today?`;
+
       sendMessageMutation.mutate({
-        message: "Hi! I'm Sara, your travel assistant. How can I help you find the perfect stay today?",
+        message: welcomeMessage,
         sessionId,
         isFromBot: true,
+        messageType: "property_suggestion",
+        metadata: { suggestedProperties: featuredProperties.slice(0, 2) }
       });
     }
-  }, [isOpen, messages.length]);
+  }, [isOpen, messages.length, featuredProperties]);
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
@@ -73,8 +102,42 @@ export default function SaraChatbot() {
   };
 
   const handleQuickAction = (action: string) => {
-    setMessage(action);
-    handleSendMessage();
+    sendMessageMutation.mutate({
+      message: action,
+      sessionId,
+      isFromBot: false,
+    });
+  };
+
+  const startListening = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+      
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setMessage(transcript);
+        setIsListening(false);
+      };
+      
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognition.start();
+    }
   };
 
   const toggleChat = () => {
@@ -133,22 +196,42 @@ export default function SaraChatbot() {
                       <p className="text-sm">{msg.message}</p>
                       {msg.messageType === "property_suggestion" && (
                         <div className="mt-2 space-y-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full text-xs"
-                            onClick={() => handleQuickAction("Show me the villa details")}
-                          >
-                            Show me details
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full text-xs"
-                            onClick={() => handleQuickAction("See more options")}
-                          >
-                            See more options
-                          </Button>
+                          <div className="grid grid-cols-2 gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                              onClick={() => handleQuickAction("Show me property details")}
+                            >
+                              🏡 View Details
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                              onClick={() => handleQuickAction("Book this property")}
+                            >
+                              📅 Book Now
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                              onClick={() => handleQuickAction("See more properties")}
+                            >
+                              🔍 More Options
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs"
+                              onClick={() => handleQuickAction("Check availability")}
+                            >
+                              ✅ Availability
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -163,17 +246,69 @@ export default function SaraChatbot() {
             <div ref={messagesEndRef} />
           </CardContent>
 
-          {/* Chat Input */}
+          {/* Quick Action Buttons */}
           <div className="p-4 border-t border-gray-200">
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-2">Quick actions:</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs h-8"
+                  onClick={() => handleQuickAction("I want to search for properties")}
+                >
+                  🏠 Search Properties
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs h-8"
+                  onClick={() => handleQuickAction("Help me with booking")}
+                >
+                  📅 Book Stay
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs h-8"
+                  onClick={() => handleQuickAction("I need help logging in")}
+                >
+                  🔑 Login Help
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs h-8"
+                  onClick={() => handleQuickAction("Show me customer support")}
+                >
+                  💬 Support
+                </Button>
+              </div>
+            </div>
+
+            {/* Chat Input */}
             <div className="flex space-x-2 mb-2">
               <Input
                 type="text"
-                placeholder="Type your message..."
+                placeholder="Type your message or use voice..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                 className="flex-1 text-sm"
               />
+              <Button
+                onClick={startListening}
+                disabled={isListening}
+                size="sm"
+                variant="outline"
+                className={isListening ? "bg-red-100" : ""}
+              >
+                {isListening ? (
+                  <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse" />
+                ) : (
+                  <Mic className="h-4 w-4" />
+                )}
+              </Button>
               <Button
                 onClick={handleSendMessage}
                 disabled={sendMessageMutation.isPending || !message.trim()}
