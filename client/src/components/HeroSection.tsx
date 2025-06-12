@@ -61,33 +61,33 @@ export default function HeroSection() {
         
         {/* Content positioned absolutely over background */}
         <div className="absolute inset-0 flex items-center justify-center px-4">
-          <div className={`text-center text-white max-w-6xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+          <div className={`text-center text-white max-w-6xl mx-auto px-4 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 sm:mb-8 leading-tight">
               <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
                 أهلاً وسهلاً<br />
                 Welcome Home
               </span>
             </h1>
-            <p className="text-xl md:text-3xl mb-12 opacity-95 font-light max-w-4xl mx-auto leading-relaxed drop-shadow-lg">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-8 sm:mb-12 opacity-95 font-light max-w-4xl mx-auto leading-relaxed drop-shadow-lg">
               Experience authentic Saudi hospitality. Stay in handpicked homes across the Kingdom, from Riyadh's skyline to Jeddah's Red Sea coast, AlUla's ancient wonders to NEOM's futuristic vision.
             </p>
-            <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 sm:mb-16">
               <Button 
-                className="glass-button px-10 py-5 text-xl font-semibold bg-brand-blue text-white hover:bg-brand-blue-dark transform hover:scale-105 transition-all duration-300 shadow-2xl"
+                className="w-full sm:w-auto glass-button px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white transform hover:scale-105 transition-all duration-300 shadow-2xl blue-glow"
                 onClick={() => setLocation('/search?location=Riyadh')}
               >
                 Book a Stay
               </Button>
               <Button 
                 variant="outline" 
-                className="glass-button px-10 py-5 text-xl font-semibold border-2 border-white/40 text-white hover:bg-white/20 backdrop-blur-md transform hover:scale-105 transition-all duration-300"
+                className="w-full sm:w-auto glass-button px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-semibold border-2 border-white/40 text-white hover:bg-white/20 backdrop-blur-md transform hover:scale-105 transition-all duration-300"
                 onClick={() => setLocation('/host')}
               >
                 List Property
               </Button>
               <Button 
                 variant="outline" 
-                className="glass-button px-10 py-5 text-xl font-semibold border-2 border-white/40 text-white hover:bg-white/20 backdrop-blur-md transform hover:scale-105 transition-all duration-300"
+                className="w-full sm:w-auto glass-button px-8 sm:px-10 py-4 sm:py-5 text-lg sm:text-xl font-semibold border-2 border-white/40 text-white hover:bg-white/20 backdrop-blur-md transform hover:scale-105 transition-all duration-300"
                 onClick={() => setLocation('/invest')}
               >
                 Invest Now
@@ -98,8 +98,8 @@ export default function HeroSection() {
       </div>
       {/* Enhanced Glass Search Bar */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl animate-slide-up" style={{ animationDelay: '0.3s' }}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+        <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl animate-slide-up blue-glow" style={{ animationDelay: '0.3s' }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 items-stretch lg:items-end">
             {/* Where */}
             <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
               <div className="flex items-center mb-2">
