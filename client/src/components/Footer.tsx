@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Sparkles, Mail, Phone, MapPin, Globe } from "lucide-react";
+import { Linkedin, Twitter, Instagram, Sparkles, Mail, Phone, MapPin, Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function Footer() {
@@ -37,14 +37,14 @@ export default function Footer() {
                   <Sparkles className="h-8 w-8 text-brand-blue animate-pulse" />
                   <div className="absolute inset-0 bg-brand-blue/20 rounded-full blur-lg opacity-50"></div>
                 </div>
-                <h3 className="text-2xl font-bold gradient-text">Habibistay</h3>
+                <h3 className="text-2xl font-bold gradient-text">HabibiStay</h3>
               </div>
               <p className="text-gray-600 dark:text-gray-300 text-base mb-6 leading-relaxed">
-                Your perfect stay awaits. Discover amazing accommodations worldwide with our comprehensive booking platform.
+                Building Wealth, Creating Memories. Local roots, global standards.
               </p>
               <div className="flex space-x-3">
                 <a href="#" className="glass-button p-3 rounded-2xl text-brand-blue hover:text-white transition-all duration-300 hover:scale-110">
-                  <Facebook className="h-5 w-5" />
+                  <Linkedin className="h-5 w-5" />
                 </a>
                 <a href="#" className="glass-button p-3 rounded-2xl text-brand-blue hover:text-white transition-all duration-300 hover:scale-110">
                   <Twitter className="h-5 w-5" />

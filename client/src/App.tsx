@@ -11,6 +11,7 @@ import HostDashboard from "@/pages/HostDashboard";
 import AdminPanel from "@/pages/AdminPanel";
 import About from "@/pages/About";
 import Invest from "@/pages/Invest";
+import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -33,6 +34,7 @@ function Router() {
           <Route path="/search" component={SearchResults} />
           <Route path="/about" component={About} />
           <Route path="/invest" component={Invest} />
+          <Route path="/contact" component={Contact} />
           <Route path="/host" component={HostDashboard} />
         </>
       ) : (
@@ -41,6 +43,7 @@ function Router() {
           <Route path="/search" component={SearchResults} />
           <Route path="/about" component={About} />
           <Route path="/invest" component={Invest} />
+          <Route path="/contact" component={Contact} />
           <Route path="/host" component={HostDashboard} />
           <Route path="/admin" component={AdminPanel} />
         </>
