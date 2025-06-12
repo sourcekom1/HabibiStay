@@ -2,25 +2,10 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed";
-import { setupSecurity } from "./middleware/security";
-import { requestIdMiddleware, performanceMiddleware, healthCheckMiddleware } from "./middleware/monitoring";
-import { globalErrorHandler, notFoundHandler } from "./utils/errorHandler";
-import { logger } from "./utils/logger";
-import { checkDatabaseHealth, monitorConnectionPool } from "./utils/database";
 
 const app = express();
-
-// Security middleware (must be first)
-setupSecurity(app);
-
-// Request processing middleware
-app.use(requestIdMiddleware);
-app.use(performanceMiddleware);
-app.use(healthCheckMiddleware);
-
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -53,52 +38,37 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  try {
-    // Database health check
-    const isDbHealthy = await checkDatabaseHealth();
-    if (!isDbHealthy) {
-      logger.error("Database health check failed");
-      process.exit(1);
-    }
-    
-    // Initialize monitoring
-    monitorConnectionPool();
-    
-    // Seed the database with initial data
-    await seedDatabase();
-    
-    const server = await registerRoutes(app);
+  // Seed the database with initial data
+  await seedDatabase();
+  
+  const server = await registerRoutes(app);
 
-    // Setup Vite in development or serve static files in production
-    if (process.env.NODE_ENV === "development") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
 
-    const port = 5000;
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      logger.info(`Habibistay server started on port ${port}`, {
-        environment: process.env.NODE_ENV,
-        timestamp: new Date().toISOString()
-      });
-    });
+    res.status(status).json({ message });
+    throw err;
+  });
 
-    // Graceful shutdown
-    process.on('SIGTERM', () => {
-      logger.info('SIGTERM received, shutting down gracefully');
-      server.close(() => {
-        logger.info('Process terminated');
-        process.exit(0);
-      });
-    });
-
-  } catch (error) {
-    logger.error('Failed to start server', error as Error);
-    process.exit(1);
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
   }
+
+  // ALWAYS serve the app on port 5000
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = 5000;
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+    log(`serving on port ${port}`);
+  });
 })();
