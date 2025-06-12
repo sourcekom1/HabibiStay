@@ -54,10 +54,43 @@ export default function HostDashboard() {
   if (!user || user.userType !== 'host') {
     return (
       <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600">Host access required</p>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center max-w-md mx-auto">
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <Home className="h-16 w-16 text-brand-blue mx-auto mb-4" />
+              <h1 className="text-2xl font-bold mb-4 text-gray-900">Host Access Required</h1>
+              <p className="text-gray-600 mb-6">
+                {!user 
+                  ? "Please log in to access the host dashboard and manage your properties"
+                  : "You need host privileges to access this page. Join thousands of hosts earning with HabibiStay"
+                }
+              </p>
+              <div className="space-y-3">
+                {!user ? (
+                  <Button 
+                    onClick={() => window.location.href = '/api/login'}
+                    className="w-full bg-brand-blue hover:bg-brand-blue/90"
+                  >
+                    Log In to Continue
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => window.location.href = '/become-host'}
+                    className="w-full bg-brand-blue hover:bg-brand-blue/90"
+                  >
+                    Become a Host
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.history.back()}
+                  className="w-full"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Go Back
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </Layout>

@@ -9,6 +9,7 @@ import Home from "@/pages/Home";
 import SearchResults from "@/pages/SearchResultsFixed";
 import HostDashboard from "@/pages/HostDashboard";
 import AdminPanel from "@/pages/AdminPanel";
+import BecomeHost from "@/pages/BecomeHost";
 import About from "@/pages/About";
 import Invest from "@/pages/Invest";
 import Contact from "@/pages/Contact";
