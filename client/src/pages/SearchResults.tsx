@@ -5,10 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
 import { 
   Search, 
   MapPin, 
@@ -17,11 +15,6 @@ import {
   Star, 
   Heart, 
   Filter,
-  Wifi,
-  Car,
-  Coffee,
-  Waves,
-  Mountain,
   ArrowLeft,
   SlidersHorizontal,
   Share2,
@@ -36,8 +29,8 @@ interface Property {
   id: number;
   title: string;
   location: string;
-  pricePerNight: number;
-  rating: number;
+  pricePerNight: string;
+  rating: string;
   reviewCount: number;
   images: string[];
   amenities: string[];
@@ -72,16 +65,6 @@ export default function SearchResults() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-
-  const location = searchParams.get('location') || '';
-  const checkIn = searchParams.get('checkIn') || '';
-  const checkOut = searchParams.get('checkOut') || '';
-  const guests = (() => {
-    const guestParam = searchParams.get('guests');
-    if (!guestParam || guestParam === 'NaN' || guestParam === '') return 1;
-    const parsed = parseInt(guestParam);
-    return !isNaN(parsed) && parsed > 0 ? parsed : 1;
-  })();
 
   useEffect(() => {
     setIsVisible(true);
@@ -151,7 +134,8 @@ export default function SearchResults() {
     },
   });
 
-  const toggleFavorite = (propertyId: number) => {
+  const toggleFavorite = (e: React.MouseEvent, propertyId: number) => {
+    e.stopPropagation();
     if (!user) {
       toast({
         title: "Sign in required",
@@ -168,67 +152,74 @@ export default function SearchResults() {
     }
   };
 
-  const amenityIcons: { [key: string]: any } = {
-    'wifi': Wifi,
-    'parking': Car,
-    'breakfast': Coffee,
-    'pool': Waves,
-    'mountain-view': Mountain
+  const handlePropertyView = (property: Property) => {
+    trackPropertyView(property.id, user?.id);
+    setSelectedProperty(property);
   };
 
-  const filteredProperties = properties.filter(property => {
-    const matchesPrice = parseFloat(property.pricePerNight) >= filters.minPrice && 
-                        parseFloat(property.pricePerNight) <= filters.maxPrice;
-    const matchesGuests = property.maxGuests >= filters.guests;
-    
-    return matchesPrice && matchesGuests;
-  });
+  const handleShare = async (e: React.MouseEvent, property: Property) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      await navigator.share({
+        title: property.title,
+        text: property.description,
+        url: window.location.origin + `/property/${property.id}`,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.origin + `/property/${property.id}`);
+      toast({
+        title: "Link copied",
+        description: "Property link has been copied to clipboard.",
+      });
+    }
+  };
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
+  const handleApplyFilters = () => {
+    refetch();
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="glass-card p-8 rounded-3xl">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-blue mx-auto"></div>
-          <p className="text-center mt-4 text-gray-600 dark:text-gray-300">Searching properties...</p>
-        </div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-brand-blue"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="bg-orb w-64 h-64 top-10 right-10 opacity-20" style={{ animationDelay: '2s' }}></div>
-      <div className="bg-orb w-48 h-48 bottom-20 left-20 opacity-15" style={{ animationDelay: '7s' }}></div>
-
-      {/* Search Header */}
-      <div className={`glass-nav sticky top-0 z-50 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-brand-blue via-blue-600 to-purple-700 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between">
+            <div>
               <Button
                 variant="ghost"
                 onClick={() => setLocation('/')}
-                className="glass-button rounded-2xl px-4 py-2 hover:scale-105 transition-all duration-300"
+                className="mb-4 text-white hover:bg-white/20"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                Back to Search
               </Button>
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
+              <div className="flex items-center space-x-4 text-white/90">
                 <MapPin className="h-4 w-4" />
-                <span>{location}</span>
+                <span>{filters.location}</span>
                 <span>•</span>
                 <Calendar className="h-4 w-4" />
-                <span>{checkIn} - {checkOut}</span>
+                <span>{filters.checkIn} - {filters.checkOut}</span>
                 <span>•</span>
                 <Users className="h-4 w-4" />
-                <span>{guests} guests</span>
+                <span>{filters.guests} guests</span>
               </div>
             </div>
             <Button
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              onClick={() => setShowAdvancedFilters(true)}
               variant="outline"
-              className="glass-button rounded-2xl"
+              className="glass-button rounded-2xl border-white/30 text-white hover:bg-white/20"
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               Advanced Filters
@@ -241,195 +232,139 @@ export default function SearchResults() {
         {/* Results Summary */}
         <div className={`mb-8 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
           <h1 className="text-3xl font-bold gradient-text mb-2">
-            {filteredProperties.length} stays in {location}
+            {properties.length} stays in {filters.location}
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            {checkIn} - {checkOut} • {guests} guests
+            {filters.checkIn} - {filters.checkOut} • {filters.guests} guests
           </p>
         </div>
 
-        <div className="flex gap-8">
-          {/* Filters Sidebar */}
-          {showFilters && (
-            <div className={`w-80 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
-              <Card className="glass-card sticky top-28">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold gradient-text mb-6">Filters</h3>
-                  
-                  {/* Price Range */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                      Price per night
-                    </label>
-                    <Slider
-                      value={filters.priceRange}
-                      onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value }))}
-                      max={1000}
-                      min={0}
-                      step={50}
-                      className="mb-2"
-                    />
-                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                      <span>${filters.priceRange[0]}</span>
-                      <span>${filters.priceRange[1]}</span>
-                    </div>
-                  </div>
-
-                  {/* Rating Filter */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                      Minimum Rating
-                    </label>
-                    <div className="flex space-x-2">
-                      {[0, 3, 4, 4.5].map((rating) => (
-                        <Button
-                          key={rating}
-                          variant={filters.rating === rating ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setFilters(prev => ({ ...prev, rating }))}
-                          className="glass-button rounded-xl"
-                        >
-                          {rating === 0 ? 'Any' : `${rating}+`}
-                          {rating > 0 && <Star className="h-3 w-3 ml-1" />}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Clear Filters */}
+        {/* Properties Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {properties.map((property, index) => (
+            <Card
+              key={property.id}
+              className={`group cursor-pointer overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
+                isVisible ? 'animate-fade-in-up' : 'opacity-0'
+              }`}
+              style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => handlePropertyView(property)}
+            >
+              <div className="relative">
+                <img
+                  src={property.images[0]}
+                  alt={property.title}
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                
+                <div className="absolute top-3 right-3 flex space-x-2">
                   <Button
-                    variant="outline"
-                    onClick={() => setFilters({ priceRange: [0, 1000], propertyType: "", amenities: [], rating: 0 })}
-                    className="w-full glass-button rounded-2xl"
+                    variant="secondary"
+                    size="sm"
+                    className="bg-white/90 hover:bg-white"
+                    onClick={(e) => handleShare(e, property)}
                   >
-                    Clear all filters
+                    <Share2 className="h-4 w-4" />
                   </Button>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Properties Grid */}
-          <div className="flex-1">
-            {filteredProperties.length === 0 ? (
-              <div className={`text-center py-16 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
-                <div className="glass-card p-12 mx-auto max-w-md">
-                  <Search className="h-16 w-16 text-brand-blue mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No properties found</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    Try adjusting your filters or search criteria
-                  </p>
-                  <Button onClick={() => setLocation('/')} className="glass-button rounded-2xl">
-                    Start new search
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className={`bg-white/90 hover:bg-white ${
+                      favoriteIds.has(property.id) ? 'text-red-600' : 'text-gray-600'
+                    }`}
+                    onClick={(e) => toggleFavorite(e, property.id)}
+                    disabled={addToFavoritesMutation.isPending || removeFromFavoritesMutation.isPending}
+                  >
+                    <Heart className={`h-4 w-4 ${favoriteIds.has(property.id) ? 'fill-current' : ''}`} />
                   </Button>
                 </div>
+
+                <Badge className="absolute bottom-3 left-3 bg-white text-gray-900">
+                  {formatSAR(parseFloat(property.pricePerNight))}/night
+                </Badge>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                {filteredProperties.map((property, index) => (
-                  <Card
-                    key={property.id}
-                    className={`glass-card group cursor-pointer transition-all duration-500 hover:scale-[1.02] ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}
-                    style={{ animationDelay: `${0.1 * index}s` }}
-                    onClick={() => setSelectedProperty(property)}
-                  >
-                    <CardContent className="p-0">
-                      {/* Property Image */}
-                      <div className="relative overflow-hidden rounded-t-3xl">
-                        <img
-                          src={property.images[0] || 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&h=600'}
-                          alt={property.title}
-                          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(property.id);
-                          }}
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-3 right-3 glass-button rounded-full w-10 h-10 p-0"
-                        >
-                          <Heart
-                            className={`h-5 w-5 ${
-                              favorites.includes(property.id)
-                                ? 'fill-red-500 text-red-500'
-                                : 'text-white'
-                            }`}
-                          />
-                        </Button>
-                      </div>
 
-                      {/* Property Details */}
-                      <div className="p-6">
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-1">
-                            {property.title}
-                          </h3>
-                          <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-medium">{property.rating}</span>
-                            <span className="text-sm text-gray-500">({property.reviewCount})</span>
-                          </div>
-                        </div>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-lg text-gray-900 truncate">
+                    {property.title}
+                  </h3>
+                  <div className="flex items-center space-x-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm font-medium">
+                      {parseFloat(property.rating).toFixed(1)}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      ({property.reviewCount})
+                    </span>
+                  </div>
+                </div>
 
-                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {property.location}
-                        </p>
+                <div className="flex items-center text-gray-600 mb-3">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  <span className="text-sm">{property.location}</span>
+                </div>
 
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300 mb-4">
-                          <span>{property.maxGuests} guests</span>
-                          <span>•</span>
-                          <span>{property.bedrooms} bedrooms</span>
-                          <span>•</span>
-                          <span>{property.bathrooms} bathrooms</span>
-                        </div>
+                <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center">
+                      <Users className="h-4 w-4 mr-1" />
+                      <span>{property.maxGuests} guests</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span>{property.bedrooms} beds</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span>{property.bathrooms} baths</span>
+                    </div>
+                  </div>
+                </div>
 
-                        {/* Amenities */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {property.amenities.slice(0, 3).map((amenity) => {
-                            const IconComponent = amenityIcons[amenity] || Coffee;
-                            return (
-                              <Badge key={amenity} variant="secondary" className="glass-button text-xs">
-                                <IconComponent className="h-3 w-3 mr-1" />
-                                {amenity.charAt(0).toUpperCase() + amenity.slice(1)}
-                              </Badge>
-                            );
-                          })}
-                          {property.amenities.length > 3 && (
-                            <Badge variant="secondary" className="glass-button text-xs">
-                              +{property.amenities.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {property.amenities.slice(0, 3).map((amenity) => (
+                    <Badge key={amenity} variant="outline" className="text-xs">
+                      {amenity}
+                    </Badge>
+                  ))}
+                  {property.amenities.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{property.amenities.length - 3} more
+                    </Badge>
+                  )}
+                </div>
 
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="text-2xl font-bold gradient-text">
-                              ${property.pricePerNight}
-                            </span>
-                            <span className="text-gray-600 dark:text-gray-300 text-sm"> / night</span>
-                          </div>
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedProperty(property);
-                            }}
-                            className="glass-button rounded-2xl hover:scale-105 transition-all duration-300"
-                          >
-                            Book now
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </div>
+                <Button className="w-full" variant="outline">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
+
+        {properties.length === 0 && (
+          <div className="text-center py-16">
+            <Search className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No properties found</h3>
+            <p className="text-gray-600 mb-6">
+              Try adjusting your search criteria or explore different locations.
+            </p>
+            <Button onClick={() => setShowAdvancedFilters(true)}>
+              <Filter className="h-4 w-4 mr-2" />
+              Adjust Filters
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Advanced Filters Modal */}
+      <EnhancedSearchFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onApplyFilters={handleApplyFilters}
+        isOpen={showAdvancedFilters}
+        onClose={() => setShowAdvancedFilters(false)}
+      />
 
       {/* Booking Modal */}
       {selectedProperty && (

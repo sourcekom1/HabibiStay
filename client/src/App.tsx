@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/Landing";
 import Home from "@/pages/Home"; 
-import SearchResults from "@/pages/SearchResults";
+import SearchResults from "@/pages/SearchResultsFixed";
 import HostDashboard from "@/pages/HostDashboard";
 import AdminPanel from "@/pages/AdminPanel";
 import About from "@/pages/About";
