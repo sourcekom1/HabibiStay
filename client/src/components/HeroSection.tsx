@@ -50,39 +50,45 @@ export default function HeroSection() {
       <div className="bg-orb w-48 h-48 top-32 right-20 opacity-20" style={{ animationDelay: '5s' }}></div>
       <div className="bg-orb w-72 h-72 bottom-20 left-1/3 opacity-15" style={{ animationDelay: '10s' }}></div>
 
-      {/* Hero Section */}
+      {/* Hero Section with Full Background */}
       <div 
-        className="min-h-[600px] bg-cover bg-center relative"
+        className="min-h-screen bg-cover bg-center bg-fixed relative"
         style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=800')"
+          backgroundImage: "url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080')"
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-blue-800/30 to-blue-700/40"></div>
-        <div className="relative z-10 flex items-center justify-center min-h-[600px] px-4">
-          <div className={`text-center text-white max-w-5xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 gradient-text">
-              Exceptional Stays. Exceptional Returns.
+        {/* Background Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/60 via-blue-800/40 to-blue-700/50"></div>
+        
+        {/* Content positioned absolutely over background */}
+        <div className="absolute inset-0 flex items-center justify-center px-4">
+          <div className={`text-center text-white max-w-6xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+              <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
+                Exceptional Stays.<br />
+                Exceptional Returns.
+              </span>
             </h1>
-            <p className="text-xl md:text-3xl mb-12 opacity-95 font-light">
+            <p className="text-xl md:text-3xl mb-12 opacity-95 font-light max-w-4xl mx-auto leading-relaxed drop-shadow-lg">
               Book memorable getaways, unlock steady income, and grow your capital—all with HabibiStay
             </p>
-            <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-8">
+            <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-16">
               <Button 
-                className="glass-button px-8 py-4 text-lg font-semibold bg-brand-blue text-white hover:bg-brand-blue-dark"
+                className="glass-button px-10 py-5 text-xl font-semibold bg-brand-blue text-white hover:bg-brand-blue-dark transform hover:scale-105 transition-all duration-300 shadow-2xl"
                 onClick={() => setLocation('/search?location=Riyadh')}
               >
                 Book a Stay
               </Button>
               <Button 
                 variant="outline" 
-                className="glass-button px-8 py-4 text-lg font-semibold border-2 border-white/30 text-white hover:bg-white/10"
+                className="glass-button px-10 py-5 text-xl font-semibold border-2 border-white/40 text-white hover:bg-white/20 backdrop-blur-md transform hover:scale-105 transition-all duration-300"
                 onClick={() => setLocation('/host')}
               >
                 List Property
               </Button>
               <Button 
                 variant="outline" 
-                className="glass-button px-8 py-4 text-lg font-semibold border-2 border-white/30 text-white hover:bg-white/10"
+                className="glass-button px-10 py-5 text-xl font-semibold border-2 border-white/40 text-white hover:bg-white/20 backdrop-blur-md transform hover:scale-105 transition-all duration-300"
                 onClick={() => setLocation('/invest')}
               >
                 Invest Now
