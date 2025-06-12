@@ -15,6 +15,7 @@ import {
   Eye,
   ArrowLeft 
 } from "lucide-react";
+import Layout from "@/components/Layout";
 
 export default function HostDashboard() {
   const { user, isLoading } = useAuth();
@@ -293,6 +294,6 @@ export default function HostDashboard() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Layout>
   );
 }

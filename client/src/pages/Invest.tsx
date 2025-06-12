@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, PieChart, Building2, Globe, FileText, Shield, BarChart3, CheckCircle } from "lucide-react";
+import Layout from "@/components/Layout";
 
 export default function Invest() {
   const [isVisible, setIsVisible] = useState(false);
@@ -12,7 +13,7 @@ export default function Invest() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <Layout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 bg-gradient-to-br from-blue-900/10 via-blue-800/5 to-blue-700/10">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=800')] bg-cover bg-center opacity-10"></div>
@@ -246,6 +247,6 @@ export default function Invest() {
           </div>
         </div>
       </section>
-    </div>
+    </Layout>
   );
 }

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import Layout from "@/components/Layout";
 
 export default function Contact() {
   const [isVisible, setIsVisible] = useState(false);
@@ -187,6 +188,6 @@ export default function Contact() {
           </div>
         </div>
       </section>
-    </div>
+    </Layout>
   );
 }

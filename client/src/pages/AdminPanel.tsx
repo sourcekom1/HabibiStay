@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
+import Layout from "@/components/Layout";
 
 export default function AdminPanel() {
   const { user, isLoading } = useAuth();

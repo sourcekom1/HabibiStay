@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Building, Users, TrendingUp, Award, Globe, Heart, Shield } from "lucide-react";
+import Layout from "@/components/Layout";
 
 export default function About() {
   const [isVisible, setIsVisible] = useState(false);
@@ -9,7 +10,7 @@ export default function About() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <Layout>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="absolute inset-0 opacity-30"></div>
@@ -165,6 +166,6 @@ export default function About() {
           </div>
         </div>
       </section>
-    </div>
+    </Layout>
   );
 }
