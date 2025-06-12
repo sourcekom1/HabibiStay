@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,16 +12,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Menu, User, Settings, LogOut, Home as HomeIcon, Sparkles } from "lucide-react";
+import { Menu, User, Settings, LogOut, Home as HomeIcon, Sparkles, Bell, Heart } from "lucide-react";
+import NotificationCenter from "./NotificationCenter";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // Fetch unread notifications count
+  const { data: unreadNotifications = [] } = useQuery({
+    queryKey: ['/api/notifications', true],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/notifications?unread=true");
+      return response.json();
+    },
+    enabled: !!user,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
 
   const handleLogin = () => {
     window.location.href = '/api/login';
@@ -73,6 +89,40 @@ export default function Navigation() {
           </div>
 
           <div className="flex items-center space-x-4">
+            {isAuthenticated && (
+              <>
+                {/* Favorites Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                  className="relative p-2 rounded-full hover:bg-brand-blue/10 transition-all duration-300"
+                >
+                  <Link href="/favorites">
+                    <Heart className="h-5 w-5 text-brand-blue" />
+                  </Link>
+                </Button>
+
+                {/* Notifications Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 rounded-full hover:bg-brand-blue/10 transition-all duration-300"
+                >
+                  <Bell className="h-5 w-5 text-brand-blue" />
+                  {unreadNotifications.length > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                    >
+                      {unreadNotifications.length > 9 ? '9+' : unreadNotifications.length}
+                    </Badge>
+                  )}
+                </Button>
+              </>
+            )}
+
             {!isAuthenticated && (
               <Button
                 variant="ghost"
@@ -149,6 +199,12 @@ export default function Navigation() {
           </div>
         </div>
       </div>
+      
+      {/* Notification Center */}
+      <NotificationCenter
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </nav>
   );
 }

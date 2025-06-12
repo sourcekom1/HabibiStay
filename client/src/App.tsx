@@ -13,6 +13,7 @@ import About from "@/pages/About";
 import Invest from "@/pages/Invest";
 import Contact from "@/pages/Contact";
 import NotFound from "@/pages/not-found";
+import FavoritesPage from "@/components/FavoritesPage";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
