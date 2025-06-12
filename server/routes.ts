@@ -404,6 +404,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/admin/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const currentUser = await storage.getUser(userId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const { startDate, endDate, eventType } = req.query;
+      const analytics = await storage.getAnalytics({
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined,
+        eventType: eventType as string,
+      });
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   // Enhanced API routes for new features
   
   // Notifications routes

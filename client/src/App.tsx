@@ -47,6 +47,7 @@ function Router() {
           <Route path="/contact" component={Contact} />
           <Route path="/host" component={HostDashboard} />
           <Route path="/admin" component={AdminPanel} />
+          <Route path="/favorites" component={FavoritesPage} />
         </>
       )}
       <Route component={NotFound} />
