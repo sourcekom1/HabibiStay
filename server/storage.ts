@@ -6,6 +6,10 @@ import {
   chatMessages,
   payments,
   smsNotifications,
+  notifications,
+  analytics,
+  favorites,
+  availability,
   type User,
   type UpsertUser,
   type Property,
@@ -20,6 +24,14 @@ import {
   type InsertPayment,
   type SmsNotification,
   type InsertSmsNotification,
+  type Notification,
+  type InsertNotification,
+  type Analytics,
+  type InsertAnalytics,
+  type Favorite,
+  type InsertFavorite,
+  type Availability,
+  type InsertAvailability,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, lte, desc, count, sum, ilike } from "drizzle-orm";
@@ -74,6 +86,31 @@ export interface IStorage {
     totalBookings: number;
     totalRevenue: number;
   }>;
+
+  // Notification operations
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string, unreadOnly?: boolean): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<Notification>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+
+  // Analytics operations
+  trackEvent(event: InsertAnalytics): Promise<Analytics>;
+  getAnalytics(filters: {
+    userId?: string;
+    eventType?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<Analytics[]>;
+
+  // Favorites operations
+  addToFavorites(userId: string, propertyId: number): Promise<Favorite>;
+  removeFromFavorites(userId: string, propertyId: number): Promise<void>;
+  getUserFavorites(userId: string): Promise<Property[]>;
+  
+  // Availability operations
+  setPropertyAvailability(propertyId: number, availability: InsertAvailability[]): Promise<void>;
+  getPropertyAvailability(propertyId: number, startDate: Date, endDate: Date): Promise<Availability[]>;
+  checkAvailability(propertyId: number, checkIn: Date, checkOut: Date): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -312,6 +349,146 @@ export class DatabaseStorage implements IStorage {
       totalBookings: bookingCount.count,
       totalRevenue: parseFloat(revenueSum.sum || '0'),
     };
+  }
+
+  // Notification operations
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [newNotification] = await db
+      .insert(notifications)
+      .values(notification)
+      .returning();
+    return newNotification;
+  }
+
+  async getUserNotifications(userId: string, unreadOnly = false): Promise<Notification[]> {
+    if (unreadOnly) {
+      return db.select().from(notifications)
+        .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)))
+        .orderBy(desc(notifications.createdAt));
+    }
+    
+    return db.select().from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async markNotificationAsRead(id: number): Promise<Notification> {
+    const [updatedNotification] = await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, id))
+      .returning();
+    return updatedNotification;
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.isRead, false)
+      ));
+  }
+
+  // Analytics operations
+  async trackEvent(event: InsertAnalytics): Promise<Analytics> {
+    const [newEvent] = await db
+      .insert(analytics)
+      .values(event)
+      .returning();
+    return newEvent;
+  }
+
+  async getAnalytics(filters: {
+    userId?: string;
+    eventType?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<Analytics[]> {
+    let conditions = [];
+    
+    if (filters.userId) {
+      conditions.push(eq(analytics.userId, filters.userId));
+    }
+    if (filters.eventType) {
+      conditions.push(eq(analytics.eventType, filters.eventType));
+    }
+    if (filters.startDate) {
+      conditions.push(gte(analytics.createdAt, filters.startDate));
+    }
+    if (filters.endDate) {
+      conditions.push(lte(analytics.createdAt, filters.endDate));
+    }
+
+    return db.select().from(analytics)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(analytics.createdAt));
+  }
+
+  // Favorites operations
+  async addToFavorites(userId: string, propertyId: number): Promise<Favorite> {
+    const [favorite] = await db
+      .insert(favorites)
+      .values({ userId, propertyId })
+      .returning();
+    return favorite;
+  }
+
+  async removeFromFavorites(userId: string, propertyId: number): Promise<void> {
+    await db
+      .delete(favorites)
+      .where(and(
+        eq(favorites.userId, userId),
+        eq(favorites.propertyId, propertyId)
+      ));
+  }
+
+  async getUserFavorites(userId: string): Promise<Property[]> {
+    return db
+      .select({
+        id: properties.id,
+        hostId: properties.hostId,
+        title: properties.title,
+        description: properties.description,
+        location: properties.location,
+        pricePerNight: properties.pricePerNight,
+        maxGuests: properties.maxGuests,
+        bedrooms: properties.bedrooms,
+        bathrooms: properties.bathrooms,
+        amenities: properties.amenities,
+        images: properties.images,
+        rating: properties.rating,
+        reviewCount: properties.reviewCount,
+        isActive: properties.isActive,
+        isFeatured: properties.isFeatured,
+        createdAt: properties.createdAt,
+        updatedAt: properties.updatedAt,
+      })
+      .from(favorites)
+      .innerJoin(properties, eq(favorites.propertyId, properties.id))
+      .where(eq(favorites.userId, userId))
+      .orderBy(desc(favorites.createdAt));
+  }
+
+  // Availability operations
+  async setPropertyAvailability(propertyId: number, availabilityData: InsertAvailability[]): Promise<void> {
+    await db.insert(availability).values(availabilityData);
+  }
+
+  async getPropertyAvailability(propertyId: number, startDate: Date, endDate: Date): Promise<Availability[]> {
+    return db.select().from(availability)
+      .where(and(
+        eq(availability.propertyId, propertyId),
+        gte(availability.date, startDate),
+        lte(availability.date, endDate)
+      ))
+      .orderBy(availability.date);
+  }
+
+  async checkAvailability(propertyId: number, checkIn: Date, checkOut: Date): Promise<boolean> {
+    const availabilityResults = await this.getPropertyAvailability(propertyId, checkIn, checkOut);
+    return availabilityResults.every(a => a.isAvailable);
   }
 }
 

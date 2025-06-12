@@ -404,6 +404,152 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced API routes for new features
+  
+  // Notifications routes
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { unread } = req.query;
+      const notifications = await storage.getUserNotifications(userId, unread === 'true');
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.patch('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      const notification = await storage.markNotificationAsRead(notificationId);
+      res.json(notification);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to update notification" });
+    }
+  });
+
+  app.patch('/api/notifications/read-all', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to update notifications" });
+    }
+  });
+
+  // Favorites routes
+  app.post('/api/favorites', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { propertyId } = req.body;
+      const favorite = await storage.addToFavorites(userId, propertyId);
+      res.json(favorite);
+    } catch (error) {
+      console.error("Error adding to favorites:", error);
+      res.status(500).json({ message: "Failed to add to favorites" });
+    }
+  });
+
+  app.delete('/api/favorites/:propertyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const propertyId = parseInt(req.params.propertyId);
+      await storage.removeFromFavorites(userId, propertyId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing from favorites:", error);
+      res.status(500).json({ message: "Failed to remove from favorites" });
+    }
+  });
+
+  app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const favorites = await storage.getUserFavorites(userId);
+      res.json(favorites);
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      res.status(500).json({ message: "Failed to fetch favorites" });
+    }
+  });
+
+  // Analytics tracking route
+  app.post('/api/analytics/track', async (req, res) => {
+    try {
+      const { eventType, eventData, sessionId, userId } = req.body;
+      const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      const userAgent = req.headers['user-agent'];
+      
+      const analyticsEvent = {
+        userId: userId || null,
+        eventType,
+        eventData,
+        sessionId,
+        ipAddress: clientIP as string,
+        userAgent,
+      };
+      
+      await storage.trackEvent(analyticsEvent);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error tracking analytics event:", error);
+      res.status(500).json({ message: "Failed to track event" });
+    }
+  });
+
+  // Enhanced property search with analytics
+  app.get('/api/search', async (req, res) => {
+    try {
+      const { location, checkIn, checkOut, guests, minPrice, maxPrice, propertyType, amenities } = req.query;
+      
+      // Safely parse guests parameter
+      let parsedGuests: number | undefined;
+      if (guests && guests !== 'NaN' && guests !== '') {
+        const guestNum = parseInt(guests as string);
+        parsedGuests = !isNaN(guestNum) && guestNum > 0 ? guestNum : undefined;
+      }
+
+      // Enhanced search with more filters
+      const searchFilters = {
+        location: location as string,
+        checkIn: checkIn ? new Date(checkIn as string) : undefined,
+        checkOut: checkOut ? new Date(checkOut as string) : undefined,
+        guests: parsedGuests,
+        minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
+        maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
+        propertyType: propertyType as string,
+        amenities: amenities ? (amenities as string).split(',') : undefined,
+      };
+
+      const properties = await storage.searchProperties(searchFilters);
+
+      // Track search analytics
+      const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      const userAgent = req.headers['user-agent'];
+      const sessionId = req.headers['x-session-id'] as string || `anonymous_${Date.now()}`;
+      
+      await storage.trackEvent({
+        eventType: 'search',
+        eventData: {
+          query: searchFilters,
+          resultsCount: properties.length,
+        },
+        sessionId,
+        ipAddress: clientIP as string,
+        userAgent: userAgent as string,
+      });
+
+      res.json(properties);
+    } catch (error) {
+      console.error("Error searching properties:", error);
+      res.status(500).json({ message: "Failed to search properties" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
