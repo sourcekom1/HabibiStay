@@ -62,11 +62,7 @@ export default function Navigation() {
   const NavLink = ({ href, children, className = "" }: { href: string; children: React.ReactNode; className?: string }) => (
     <Link 
       href={href} 
-      className={`glass-button px-4 py-2 rounded-2xl font-medium transition-all duration-300 hover:scale-105 ${
-        isActive(href) 
-          ? 'text-white bg-brand-blue shadow-lg' 
-          : 'text-gray-700 dark:text-gray-200 hover:text-brand-blue'
-      } ${className}`}
+      className="glass-button px-4 py-2 rounded-2xl font-medium transition-all duration-300 hover:scale-105 bg-brand-blue shadow-lg text-[#575b78]"
     >
       {children}
     </Link>
