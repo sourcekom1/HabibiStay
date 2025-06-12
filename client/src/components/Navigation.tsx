@@ -42,7 +42,7 @@ export default function Navigation() {
                     <div className="absolute inset-0 bg-brand-blue/20 rounded-full blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
                   </div>
                   <h1 className="text-3xl font-bold gradient-text group-hover:scale-105 transition-transform duration-300">
-                    Habibistay
+                    HabibiStay
                   </h1>
                 </div>
               </Link>

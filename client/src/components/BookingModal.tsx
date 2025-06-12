@@ -49,7 +49,8 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
     serviceFee: 0,
     cleaningFee: 50,
     taxes: 0,
-    total: 0
+    total: 0,
+    nights: 0
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
@@ -362,19 +363,33 @@ export default function BookingModal({ property, isOpen, onClose }: BookingModal
             <div className="glass-button p-6 rounded-2xl border-2 border-blue-200/50 bg-blue-50/50 dark:bg-blue-900/20">
               <p className="text-blue-800 dark:text-blue-200 flex items-center font-medium">
                 <Info className="h-5 w-5 mr-3 text-brand-blue" />
-                Payment processing is handled securely through MyFatoorah. Your booking will be confirmed instantly.
+                Payment processing is handled securely through PayPal. Your booking will be confirmed instantly.
               </p>
             </div>
 
-            {/* Complete Booking Button */}
-            <Button
-              onClick={handleSubmit}
-              disabled={bookingMutation.isPending || total === 0}
-              className="w-full glass-button bg-brand-blue text-white py-4 px-6 rounded-2xl hover:bg-brand-blue-dark transition-all duration-300 font-semibold text-lg border-2 border-brand-blue hover:scale-105 pulse-glow"
-            >
-              <Lock className="h-5 w-5 mr-3" />
-              {bookingMutation.isPending ? "Processing..." : `Complete Secure Booking - ${formatSAR(total)}`}
-            </Button>
+            {/* PayPal Payment */}
+            {bookingData.paymentMethod === 'paypal' && total > 0 && (
+              <div className="glass-button p-6 rounded-2xl">
+                <h5 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Complete Payment</h5>
+                <PayPalButton 
+                  amount={total.toString()}
+                  currency="USD"
+                  intent="CAPTURE"
+                />
+              </div>
+            )}
+
+            {/* Complete Booking Button for Card */}
+            {bookingData.paymentMethod === 'card' && (
+              <Button
+                onClick={handleSubmit}
+                disabled={bookingMutation.isPending || total === 0}
+                className="w-full glass-button bg-brand-blue text-white py-4 px-6 rounded-2xl hover:bg-brand-blue-dark transition-all duration-300 font-semibold text-lg border-2 border-brand-blue hover:scale-105 pulse-glow"
+              >
+                <Lock className="h-5 w-5 mr-3" />
+                {bookingMutation.isPending ? "Processing..." : `Complete Secure Booking - ${formatSAR(total)}`}
+              </Button>
+            )}
           </div>
         </div>
       </DialogContent>

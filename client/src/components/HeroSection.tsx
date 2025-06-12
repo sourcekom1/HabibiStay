@@ -58,11 +58,33 @@ export default function HeroSection() {
         <div className="relative z-10 flex items-center justify-center min-h-[600px] px-4">
           <div className={`text-center text-white max-w-5xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
             <h1 className="text-5xl md:text-7xl font-bold mb-8 gradient-text">
-              Find your perfect stay
+              Exceptional Stays. Exceptional Returns.
             </h1>
             <p className="text-xl md:text-3xl mb-12 opacity-95 font-light">
-              Discover amazing places to stay around the world
+              Book memorable getaways, unlock steady income, and grow your capital—all with HabibiStay
             </p>
+            <div className="flex flex-col md:flex-row gap-4 justify-center items-center mb-8">
+              <Button 
+                className="glass-button px-8 py-4 text-lg font-semibold bg-brand-blue text-white hover:bg-brand-blue-dark"
+                onClick={() => setLocation('/search?location=Riyadh')}
+              >
+                Book a Stay
+              </Button>
+              <Button 
+                variant="outline" 
+                className="glass-button px-8 py-4 text-lg font-semibold border-2 border-white/30 text-white hover:bg-white/10"
+                onClick={() => setLocation('/host')}
+              >
+                List Property
+              </Button>
+              <Button 
+                variant="outline" 
+                className="glass-button px-8 py-4 text-lg font-semibold border-2 border-white/30 text-white hover:bg-white/10"
+                onClick={() => setLocation('/invest')}
+              >
+                Invest Now
+              </Button>
+            </div>
           </div>
         </div>
       </div>
