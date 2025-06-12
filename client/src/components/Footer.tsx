@@ -87,7 +87,7 @@ export default function Footer() {
           </div>
 
           <div className={`border-t-2 border-brand-blue/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>
-            <p className="text-gray-600 dark:text-gray-300 font-medium">&copy; 2024 Habibistay. All rights reserved.</p>
+            <p className="text-gray-600 dark:text-gray-300 font-medium">&copy; 2025 HabibiStay. All rights reserved.</p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-brand-blue font-medium transition-colors duration-300">Privacy Policy</a>
               <a href="#" className="text-gray-600 dark:text-gray-300 hover:text-brand-blue font-medium transition-colors duration-300">Terms of Service</a>
