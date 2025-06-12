@@ -135,28 +135,27 @@ export default function HeroSection() {
             </div>
 
             {/* Check out */}
-            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
+            <div className="group glass-input-container bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:bg-white/15 hover:border-white/30 focus-within:bg-white/20 focus-within:border-blue-300/60 hover:scale-105">
               <div className="flex items-center mb-2">
-                <Calendar className="h-5 w-5 text-blue-300 mr-2" />
-                <Label htmlFor="search-checkout" className="text-sm font-semibold text-white/90">Check out</Label>
+                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-checkout" className="text-xs sm:text-sm font-semibold text-white/90">Check out</Label>
               </div>
               <Input
                 id="search-checkout"
                 type="date"
                 value={searchData.checkOut}
                 onChange={(e) => handleInputChange("checkOut", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none text-white font-medium"
-                required
+                className="w-full text-sm sm:text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none text-white font-medium h-6 sm:h-auto"
                 aria-label="Select check-out date"
                 min={searchData.checkIn || new Date().toISOString().split('T')[0]}
               />
             </div>
 
             {/* Guests */}
-            <div className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:bg-white/10 hover:border-white/20 focus-within:bg-white/15 focus-within:border-blue-300/50">
+            <div className="group glass-input-container bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-3 sm:p-4 lg:p-6 transition-all duration-300 hover:bg-white/15 hover:border-white/30 focus-within:bg-white/20 focus-within:border-blue-300/60 hover:scale-105">
               <div className="flex items-center mb-2">
-                <Users className="h-5 w-5 text-blue-300 mr-2" />
-                <Label htmlFor="search-guests" className="text-sm font-semibold text-white/90">Guests</Label>
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-300 mr-2" />
+                <Label htmlFor="search-guests" className="text-xs sm:text-sm font-semibold text-white/90">Guests</Label>
               </div>
               <Input
                 id="search-guests"
@@ -166,21 +165,21 @@ export default function HeroSection() {
                 max="20"
                 value={searchData.guests}
                 onChange={(e) => handleInputChange("guests", e.target.value)}
-                className="w-full text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-white/60 text-white font-medium"
+                className="w-full text-sm sm:text-base border-0 bg-transparent p-0 focus:ring-0 shadow-none placeholder:text-white/60 text-white font-medium h-6 sm:h-auto"
                 aria-label="Number of guests"
               />
             </div>
 
             {/* Search Button */}
-            <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex items-center justify-center">
+            <div className="col-span-1 sm:col-span-2 lg:col-span-1 flex items-center justify-center lg:items-stretch">
               <Button
                 type="submit"
-                className="w-full h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 text-white font-semibold backdrop-blur-sm border border-blue-400/30"
+                className="w-full h-12 sm:h-14 lg:h-auto glass-button bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-2xl transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 text-white font-semibold border-2 border-blue-400/30 backdrop-blur-sm"
                 aria-label="Search properties"
               >
-                <Search className="h-6 w-6 mr-2" />
-                <span className="hidden sm:inline">Search</span>
-                <span className="sm:hidden">Find</span>
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+                <span className="hidden sm:inline text-base sm:text-lg font-semibold">Search</span>
+                <span className="sm:hidden text-sm font-semibold">Find</span>
               </Button>
             </div>
           </div>
