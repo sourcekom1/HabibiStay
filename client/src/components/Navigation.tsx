@@ -37,6 +37,12 @@ export default function Navigation() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
+  // Fetch user favorites count
+  const { data: userFavorites = [] } = useQuery({
+    queryKey: ['/api/favorites'],
+    enabled: !!user,
+  });
+
   const handleLogin = () => {
     window.location.href = '/api/login';
   };
@@ -100,6 +106,14 @@ export default function Navigation() {
                 >
                   <Link href="/favorites">
                     <Heart className="h-5 w-5 text-brand-blue" />
+                    {userFavorites.length > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      >
+                        {userFavorites.length}
+                      </Badge>
+                    )}
                   </Link>
                 </Button>
 
