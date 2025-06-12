@@ -258,7 +258,7 @@ How can I help you find the perfect stay today?`;
                       <Bot className="h-4 w-4 text-white" />
                     </div>
                     <div className="bg-gradient-to-r from-white/90 to-blue-50/90 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-white/20">
-                      <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">{msg.message}</p>
+                      <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">{msg.message}</div>
                       {msg.messageType === "property_suggestion" && (
                         <div className="mt-3 space-y-2">
                           <div className="grid grid-cols-2 gap-2">

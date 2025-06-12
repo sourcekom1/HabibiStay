@@ -17,7 +17,10 @@ import {
   Mountain,
   Home,
   Building,
-  Castle
+  Castle,
+  Calendar,
+  DollarSign,
+  Star
 } from "lucide-react";
 
 interface SearchFilters {
@@ -103,40 +106,48 @@ export default function EnhancedSearchFilters({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="flex items-center space-x-2">
-            <Filter className="h-5 w-5" />
-            <span>Advanced Filters</span>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <Card className="w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto glass-card animate-in zoom-in-95 duration-300">
+        <CardHeader className="sticky top-0 glass-nav border-b border-white/20 flex flex-row items-center justify-between space-y-0 p-4 sm:p-6">
+          <CardTitle className="flex items-center space-x-2 text-gray-800 dark:text-white">
+            <Filter className="h-5 w-5 text-blue-600" />
+            <span className="text-lg sm:text-xl font-semibold">Advanced Filters</span>
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} className="hover:bg-white/20 rounded-full p-2">
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-4 sm:p-6">
           {/* Basic Search */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                placeholder="City or area"
-                value={localFilters.location}
-                onChange={(e) => updateFilter('location', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="guests">Guests</Label>
-              <Input
-                id="guests"
-                type="number"
-                min="1"
-                max="20"
-                value={localFilters.guests}
-                onChange={(e) => updateFilter('guests', parseInt(e.target.value) || 1)}
-              />
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <Home className="h-5 w-5 text-blue-600" />
+              Basic Search
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sm font-medium text-gray-700 dark:text-gray-300">Location</Label>
+                <Input
+                  id="location"
+                  placeholder="City, neighborhood, or landmark"
+                  value={localFilters.location}
+                  onChange={(e) => updateFilter('location', e.target.value)}
+                  className="glass-input h-11 rounded-xl border-2 border-white/20 bg-white/70 backdrop-blur-sm focus:border-blue-400 focus:bg-white/80 transition-all duration-200"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="guests" className="text-sm font-medium text-gray-700 dark:text-gray-300">Guests</Label>
+                <Input
+                  id="guests"
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={localFilters.guests}
+                  onChange={(e) => updateFilter('guests', parseInt(e.target.value) || 1)}
+                  className="glass-input h-11 rounded-xl border-2 border-white/20 bg-white/70 backdrop-blur-sm focus:border-blue-400 focus:bg-white/80 transition-all duration-200"
+                />
+              </div>
             </div>
           </div>
 
