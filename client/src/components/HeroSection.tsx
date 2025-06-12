@@ -65,12 +65,12 @@ export default function HeroSection() {
           <div className={`text-center text-white max-w-6xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
               <span className="bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent drop-shadow-2xl">
-                Exceptional Stays.<br />
-                Exceptional Returns.
+                أهلاً وسهلاً<br />
+                Welcome Home
               </span>
             </h1>
             <p className="text-xl md:text-3xl mb-12 opacity-95 font-light max-w-4xl mx-auto leading-relaxed drop-shadow-lg">
-              Book memorable getaways, unlock steady income, and grow your capital—all with HabibiStay
+              Experience authentic Saudi hospitality. Stay in handpicked homes across the Kingdom, from Riyadh's skyline to Jeddah's Red Sea coast, AlUla's ancient wonders to NEOM's futuristic vision.
             </p>
             <div className="flex flex-col md:flex-row gap-6 justify-center items-center mb-16">
               <Button 

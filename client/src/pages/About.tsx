@@ -18,10 +18,10 @@ export default function About() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`text-center max-w-4xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text">
-              Local Roots, Global Standards.
+              Saudi Hospitality. Global Excellence.
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              Founded in the heart of Riyadh, HabibiStay was born from a passion for genuine Saudi hospitality and a vision to elevate the short-term rental experience.
+              Born from the ancient Arabian tradition of welcoming guests with open arms, HabibiStay brings centuries-old hospitality values into the modern world. We connect travelers with authentic Saudi experiences while creating sustainable income opportunities for property owners across the Kingdom.
             </p>
           </div>
         </div>
@@ -36,10 +36,10 @@ export default function About() {
                 Our Story
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-                We merge deep local understanding with cutting-edge technology and international best practices to create unforgettable stays for our guests and steady, reliable wealth for our partners.
+                From the bustling business districts of Riyadh to the historic pearling heritage of the Eastern Province, from the mountain retreats of Asir to the coastal gems along the Red Sea - we showcase the Kingdom's diverse beauty through carefully curated accommodations.
               </p>
               <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
-                Our commitment is to showcase the best of Riyadh while delivering exceptional value and service to every stakeholder in our ecosystem.
+                Our platform combines traditional Saudi hospitality values with cutting-edge technology, creating exceptional experiences for guests while generating sustainable returns for property owners and investors.
               </p>
             </div>
             <div className={`glass-card p-8 ${isVisible ? 'animate-slide-right' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>

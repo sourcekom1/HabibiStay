@@ -35,10 +35,10 @@ export default function Contact() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`text-center max-w-4xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text">
-              Let's Talk.
+              أهلاً وسهلاً - We're Here to Help
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              We're here to help. Whether you're looking to book a stay, list your property, explore investment opportunities, or just have a question, reach out to our friendly team.
+              From Riyadh to Jeddah, Dammam to AlUla - our local Saudi team understands your needs. Whether you're planning your next getaway, looking to host travelers, or exploring investment opportunities in the Kingdom's booming tourism sector.
             </p>
           </div>
         </div>
