@@ -96,6 +96,34 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Payments table for Stripe transactions
+export const payments = pgTable("payments", {
+  id: serial("id").primaryKey(),
+  bookingId: integer("booking_id").notNull().references(() => bookings.id),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id").unique(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("USD"),
+  status: varchar("status").default("pending"), // pending, succeeded, failed, cancelled
+  paymentMethod: varchar("payment_method").default("card"), // card, paypal
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// SMS notifications table
+export const smsNotifications = pgTable("sms_notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id),
+  phoneNumber: varchar("phone_number").notNull(),
+  message: text("message").notNull(),
+  status: varchar("status").default("pending"), // pending, sent, failed
+  provider: varchar("provider").default("twilio"), // twilio, etc
+  externalId: varchar("external_id"), // Provider's message ID
+  bookingId: integer("booking_id").references(() => bookings.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  sentAt: timestamp("sent_at"),
+});
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
@@ -126,6 +154,18 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSmsNotificationSchema = createInsertSchema(smsNotifications).omit({
+  id: true,
+  createdAt: true,
+  sentAt: true,
+});
+
 // Types
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -137,3 +177,7 @@ export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
+export type InsertSmsNotification = z.infer<typeof insertSmsNotificationSchema>;
+export type SmsNotification = typeof smsNotifications.$inferSelect;

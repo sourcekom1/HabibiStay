@@ -4,6 +4,8 @@ import {
   bookings,
   reviews,
   chatMessages,
+  payments,
+  smsNotifications,
   type User,
   type UpsertUser,
   type Property,
@@ -14,9 +16,13 @@ import {
   type InsertReview,
   type ChatMessage,
   type InsertChatMessage,
+  type Payment,
+  type InsertPayment,
+  type SmsNotification,
+  type InsertSmsNotification,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lte, desc, count, sum } from "drizzle-orm";
+import { eq, and, gte, lte, desc, count, sum, ilike } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -50,6 +56,16 @@ export interface IStorage {
   // Chat operations
   getChatMessages(sessionId: string): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  
+  // Payment operations
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePaymentStatus(id: number, status: string): Promise<Payment>;
+  getPaymentsByBooking(bookingId: number): Promise<Payment[]>;
+  
+  // SMS operations
+  createSmsNotification(sms: InsertSmsNotification): Promise<SmsNotification>;
+  updateSmsStatus(id: number, status: string, externalId?: string): Promise<SmsNotification>;
+  getPendingSmsNotifications(): Promise<SmsNotification[]>;
   
   // Admin operations
   getAdminStats(): Promise<{
@@ -220,6 +236,62 @@ export class DatabaseStorage implements IStorage {
       .values(message)
       .returning();
     return newMessage;
+  }
+
+  // Payment operations
+  async createPayment(payment: InsertPayment): Promise<Payment> {
+    const [newPayment] = await db
+      .insert(payments)
+      .values(payment)
+      .returning();
+    return newPayment;
+  }
+
+  async updatePaymentStatus(id: number, status: string): Promise<Payment> {
+    const [updatedPayment] = await db
+      .update(payments)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(payments.id, id))
+      .returning();
+    return updatedPayment;
+  }
+
+  async getPaymentsByBooking(bookingId: number): Promise<Payment[]> {
+    return db.select().from(payments)
+      .where(eq(payments.bookingId, bookingId))
+      .orderBy(desc(payments.createdAt));
+  }
+
+  // SMS operations
+  async createSmsNotification(sms: InsertSmsNotification): Promise<SmsNotification> {
+    const [newSms] = await db
+      .insert(smsNotifications)
+      .values(sms)
+      .returning();
+    return newSms;
+  }
+
+  async updateSmsStatus(id: number, status: string, externalId?: string): Promise<SmsNotification> {
+    const updates: any = { status };
+    if (status === 'sent') {
+      updates.sentAt = new Date();
+    }
+    if (externalId) {
+      updates.externalId = externalId;
+    }
+
+    const [updatedSms] = await db
+      .update(smsNotifications)
+      .set(updates)
+      .where(eq(smsNotifications.id, id))
+      .returning();
+    return updatedSms;
+  }
+
+  async getPendingSmsNotifications(): Promise<SmsNotification[]> {
+    return db.select().from(smsNotifications)
+      .where(eq(smsNotifications.status, 'pending'))
+      .orderBy(smsNotifications.createdAt);
   }
 
   // Admin operations
