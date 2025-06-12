@@ -49,7 +49,6 @@ export default function HeroSection() {
       <div className="bg-orb w-64 h-64 top-10 left-10 opacity-30" style={{ animationDelay: '0s' }}></div>
       <div className="bg-orb w-48 h-48 top-32 right-20 opacity-20" style={{ animationDelay: '5s' }}></div>
       <div className="bg-orb w-72 h-72 bottom-20 left-1/3 opacity-15" style={{ animationDelay: '10s' }}></div>
-
       {/* Hero Section with Full Background */}
       <div 
         className="min-h-screen bg-cover bg-center bg-fixed relative"
@@ -97,10 +96,9 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
-
       {/* Enhanced Glass Search Bar */}
       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-full max-w-6xl mx-auto px-4">
-        <form onSubmit={handleSearch} className={`glass-search rounded-3xl p-4 ${isVisible ? 'animate-slide-up' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+        <form onSubmit={handleSearch} className="glass-search rounded-3xl p-4 animate-slide-up ml-[45px] mr-[45px] mt-[10px] mb-[10px] pt-[0px] pb-[0px] pl-[51px] pr-[51px] text-center" style={{ animationDelay: '0.3s' }}>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
             {/* Where */}
             <div className="group flex-1 px-6 py-4 rounded-2xl transition-all duration-300 hover:bg-white/20">
