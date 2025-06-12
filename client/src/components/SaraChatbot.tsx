@@ -303,7 +303,7 @@ How can I help you find the perfect stay today?`;
                   </div>
                 ) : (
                   <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl p-4 max-w-[85%] shadow-lg">
-                    <p className="text-sm leading-relaxed">{msg.message}</p>
+                    <div className="text-sm leading-relaxed">{msg.message}</div>
                   </div>
                 )}
               </div>
