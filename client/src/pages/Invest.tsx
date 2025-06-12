@@ -21,10 +21,10 @@ export default function Invest() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`text-center max-w-4xl mx-auto ${isVisible ? 'animate-slide-up' : 'opacity-0'}`}>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text">
-              Grow Your Wealth in Riyadh's Booming Market.
+              Invest in Saudi Arabia's Vision 2030
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              Secure, hands‑free real estate investment opportunities for strong returns, backed by HabibiStay's expertise.
+              Join the Kingdom's tourism revolution. With 100+ million visitors expected by 2030, NEOM rising, and AlUla opening to the world - Saudi real estate offers unprecedented growth opportunities. HabibiStay provides expert-managed investment access to this transformation.
             </p>
             <Button className="glass-button bg-brand-blue text-white px-8 py-4 text-lg font-semibold hover:bg-brand-blue-dark">
               Request Investor Deck
