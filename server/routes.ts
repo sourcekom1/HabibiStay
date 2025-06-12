@@ -19,6 +19,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // PayPal payment routes
+  app.get("/setup", loadPaypalDefault);
+  app.post("/order", createPaypalOrder);
+  app.post("/order/:orderID/capture", capturePaypalOrder);
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
@@ -147,7 +152,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         guestId: userId
       });
+
+      // Create booking
       const booking = await storage.createBooking(bookingData);
+
+      // Create PayPal payment record
+      const paymentData = {
+        bookingId: booking.id,
+        amount: booking.totalAmount,
+        currency: "USD",
+        paymentMethod: "paypal",
+        status: "pending"
+      };
+      
+      await storage.createPayment(paymentData);
+
+      // Send confirmation SMS if phone number provided
+      if (req.body.guestInfo?.phone) {
+        const property = await storage.getProperty(booking.propertyId);
+        const smsData = {
+          userId,
+          phoneNumber: req.body.guestInfo.phone,
+          message: smsTemplates.bookingConfirmation(
+            req.body.guestInfo.name || "Guest",
+            property?.title || "Property",
+            new Date(booking.checkIn).toLocaleDateString()
+          ),
+          bookingId: booking.id
+        };
+        await storage.createSmsNotification(smsData);
+        
+        // Send SMS immediately
+        const smsResult = await smsService.sendSms(smsData.phoneNumber, smsData.message);
+        if (smsResult.success) {
+          await storage.updateSmsStatus(booking.id, "sent", smsResult.messageId);
+        }
+      }
+
       res.json(booking);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -222,17 +263,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messageData = insertChatMessageSchema.parse(req.body);
       const message = await storage.createChatMessage(messageData);
       
-      // Simple AI response logic for Sara
+      // Generate AI response using OpenAI
       if (!messageData.isFromBot) {
-        const botResponse = await generateBotResponse(messageData.message);
+        // Get recent properties for context
+        const properties = await storage.getProperties({ featured: true, limit: 5 });
+        
+        // Get previous messages for context
+        const previousMessages = await storage.getChatMessages(messageData.sessionId);
+        const lastFewMessages = previousMessages.slice(-5).map(msg => ({
+          role: msg.isFromBot ? "assistant" : "user",
+          content: msg.message
+        }));
+
+        const botResponse = await generateChatResponse(messageData.message, {
+          previousMessages: lastFewMessages,
+          userType: messageData.userId ? "guest" : "anonymous",
+          properties
+        });
+
         const botMessage = await storage.createChatMessage({
           sessionId: messageData.sessionId,
           userId: messageData.userId,
           message: botResponse.message,
           isFromBot: true,
-          messageType: botResponse.type,
+          messageType: botResponse.messageType,
           metadata: botResponse.metadata
         });
+        
         res.json({ userMessage: message, botMessage });
       } else {
         res.json({ userMessage: message });
