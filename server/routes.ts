@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { AuthService, authenticateJWT, requireRole, optionalAuth, type AuthenticatedRequest } from "./auth";
+import { AuthService, authenticateJWT, authenticateUnified, requireRole, optionalAuth, type AuthenticatedRequest } from "./auth";
 import { generateChatResponse, analyzeUserIntent } from "./openai";
 import { smsService, smsTemplates } from "./sms";
 import { 
@@ -360,10 +360,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bookings routes with JWT auth
-  app.get('/api/bookings', authenticateJWT, async (req: any, res) => {
+  // Bookings routes with unified auth
+  app.get('/api/bookings', authenticateUnified, async (req: any, res) => {
     try {
-      const userId = req.user.userId;
+      const userId = req.user.userId || req.user.claims?.sub;
       const bookings = await storage.getBookingsByUser(userId);
       res.json(bookings);
     } catch (error) {

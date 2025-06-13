@@ -6,7 +6,7 @@ import { storage } from './storage';
 
 // Custom request type for JWT authentication
 export interface AuthenticatedRequest extends Request {
-  user?: JWTPayload;
+  user?: JWTPayload | any; // Allow both JWT and Replit Auth user objects
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
@@ -123,7 +123,50 @@ export function requireRole(allowedRoles: string[]) {
   };
 }
 
-// JWT authentication middleware
+// Enhanced unified authentication middleware with role detection
+export function authenticateUnified(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+  // Check for JWT token first
+  if (token) {
+    try {
+      const decoded = AuthService.verifyToken(token);
+      req.user = decoded;
+      return next();
+    } catch (error) {
+      // JWT failed, try Replit Auth fallback
+    }
+  }
+
+  // Fallback to Replit Auth session with role detection
+  if ((req as any).user?.claims) {
+    const replitUser = (req as any).user.claims;
+    
+    // Check if user exists in database to get their role
+    storage.getUserByEmail(replitUser.email).then(dbUser => {
+      req.user = {
+        userId: replitUser.sub,
+        email: replitUser.email,
+        userType: dbUser?.userType || 'guest'
+      };
+      next();
+    }).catch(() => {
+      // If user not in database, create as guest
+      req.user = {
+        userId: replitUser.sub,
+        email: replitUser.email,
+        userType: 'guest'
+      };
+      next();
+    });
+    return;
+  }
+
+  return res.status(401).json({ message: 'Authentication required' });
+}
+
+// JWT-only authentication middleware
 export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
