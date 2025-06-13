@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { AuthService, authenticateJWT, requireRole, optionalAuth } from "./auth";
 import { generateChatResponse, analyzeUserIntent } from "./openai";
 import { smsService, smsTemplates } from "./sms";
 import { 
@@ -36,29 +37,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email/password authentication routes
+  // Enhanced authentication routes with JWT and password hashing
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, userType = 'guest' } = req.body;
       
+      // Validate input
+      if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "Email already registered" });
       }
 
-      // Create user with email/password
+      // Hash password and generate verification token
+      const passwordHash = await AuthService.hashPassword(password);
+      const emailVerificationToken = AuthService.generateResetToken(`user_${Date.now()}_${Math.random()}`);
+      
+      // Create user
       const user = await storage.createUser({
         id: `user_${Date.now()}_${Math.random()}`,
         email,
         firstName,
         lastName,
-        // In a real app, you'd hash the password
-        // For now, we'll store it as metadata
+        userType,
+        passwordHash,
+        emailVerificationToken,
         profileImageUrl: null
       });
 
-      res.json({ message: "Account created successfully", user });
+      // Send verification email (only if SMTP is configured)
+      try {
+        if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+          await AuthService.sendVerificationEmail(email, emailVerificationToken);
+        }
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+        // Continue registration even if email fails
+      }
+
+      // Generate JWT token
+      const token = AuthService.generateToken({
+        userId: user.id,
+        email: user.email!,
+        userType: user.userType || 'guest'
+      });
+
+      res.json({ 
+        message: "Account created successfully", 
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          firstName: user.firstName, 
+          lastName: user.lastName,
+          userType: user.userType,
+          emailVerified: user.emailVerified
+        },
+        token 
+      });
     } catch (error) {
       console.error("Registration error:", error);
       res.status(500).json({ message: "Failed to create account" });
@@ -69,17 +112,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
       const user = await storage.getUserByEmail(email);
-      if (!user) {
+      if (!user || !user.passwordHash) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // In a real app, you'd verify the hashed password
-      // For now, we'll simulate successful login
-      res.json({ message: "Login successful", user });
+      // Check if account is active
+      if (!user.isActive) {
+        return res.status(401).json({ message: "Account is deactivated" });
+      }
+
+      // Verify password
+      const isValidPassword = await AuthService.verifyPassword(password, user.passwordHash);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Update last login
+      await storage.updateUser(user.id, { lastLoginAt: new Date() });
+
+      // Generate JWT token
+      const token = AuthService.generateToken({
+        userId: user.id,
+        email: user.email!,
+        userType: user.userType || 'guest'
+      });
+
+      res.json({ 
+        message: "Login successful", 
+        user: { 
+          id: user.id, 
+          email: user.email, 
+          firstName: user.firstName, 
+          lastName: user.lastName,
+          userType: user.userType,
+          emailVerified: user.emailVerified
+        },
+        token 
+      });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Failed to log in" });
+    }
+  });
+
+  // Password reset request
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // Don't reveal if email exists for security
+        return res.json({ message: "If the email exists, a reset link has been sent" });
+      }
+
+      // Generate reset token
+      const resetToken = AuthService.generateResetToken(user.id);
+      const resetExpires = new Date(Date.now() + 3600000); // 1 hour
+
+      // Save reset token
+      await storage.updateUser(user.id, {
+        passwordResetToken: resetToken,
+        passwordResetExpires: resetExpires
+      });
+
+      // Send reset email (only if SMTP is configured)
+      try {
+        if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+          await AuthService.sendPasswordResetEmail(email, resetToken);
+        }
+      } catch (emailError) {
+        console.error("Failed to send reset email:", emailError);
+      }
+
+      res.json({ message: "If the email exists, a reset link has been sent" });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Failed to process password reset" });
+    }
+  });
+
+  // Password reset confirmation
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      
+      if (!token || !newPassword) {
+        return res.status(400).json({ message: "Token and new password are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
+      // Verify reset token
+      let decoded;
+      try {
+        decoded = AuthService.verifyResetToken(token);
+      } catch (error) {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      const user = await storage.getUser(decoded.userId);
+      if (!user || user.passwordResetToken !== token) {
+        return res.status(400).json({ message: "Invalid reset token" });
+      }
+
+      // Check if token is expired
+      if (!user.passwordResetExpires || user.passwordResetExpires < new Date()) {
+        return res.status(400).json({ message: "Reset token has expired" });
+      }
+
+      // Hash new password and update user
+      const passwordHash = await AuthService.hashPassword(newPassword);
+      await storage.updateUser(user.id, {
+        passwordHash,
+        passwordResetToken: null,
+        passwordResetExpires: null
+      });
+
+      res.json({ message: "Password reset successfully" });
+    } catch (error) {
+      console.error("Password reset confirmation error:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
+  // Email verification
+  app.post('/api/auth/verify-email', async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Verification token is required" });
+      }
+
+      // For simplicity, we'll find user by verification token
+      const user = await storage.getUserByVerificationToken(token);
+      if (!user) {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+
+      // Update user as verified
+      await storage.updateUser(user.id, {
+        emailVerified: true,
+        emailVerificationToken: null
+      });
+
+      res.json({ message: "Email verified successfully" });
+    } catch (error) {
+      console.error("Email verification error:", error);
+      res.status(500).json({ message: "Failed to verify email" });
     }
   });
 
