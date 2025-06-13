@@ -360,15 +360,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bookings routes
-  app.get('/api/bookings', isAuthenticated, async (req: any, res) => {
+  // Bookings routes with JWT auth
+  app.get('/api/bookings', authenticateJWT, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.userId;
       const bookings = await storage.getBookingsByUser(userId);
       res.json(bookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
+  // Get bookings for hosts
+  app.get('/api/host/bookings', authenticateJWT, requireRole(['host', 'admin']), async (req: any, res) => {
+    try {
+      const userId = req.user.userId;
+      const bookings = await storage.getBookingsByHost(userId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching host bookings:", error);
+      res.status(500).json({ message: "Failed to fetch host bookings" });
+    }
+  });
+
+  // Update booking status (for hosts and admins)
+  app.put('/api/bookings/:id/status', authenticateJWT, requireRole(['host', 'admin']), async (req: any, res) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const { status } = req.body;
+      const userId = req.user.userId;
+
+      if (!['confirmed', 'cancelled', 'completed'].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const booking = await storage.getBooking(bookingId);
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+
+      // Check if user is the host of the property or admin
+      const property = await storage.getProperty(booking.propertyId);
+      if (!property || (property.hostId !== userId && req.user.userType !== 'admin')) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const updatedBooking = await storage.updateBookingStatus(bookingId, status);
+
+      // Send notification to guest
+      await storage.createNotification({
+        userId: booking.guestId,
+        type: 'booking',
+        title: `Booking ${status}`,
+        message: `Your booking for ${property.title} has been ${status}`,
+        data: { bookingId, propertyId: property.id, status }
+      });
+
+      // Send SMS notification if phone number available
+      if (booking.guestInfo && (booking.guestInfo as any).phone) {
+        const message = smsTemplates.bookingStatusUpdate(
+          property.title,
+          status,
+          booking.checkIn?.toISOString().split('T')[0] || ''
+        );
+        
+        try {
+          await smsService.sendSms((booking.guestInfo as any).phone, message);
+        } catch (smsError) {
+          console.error("Failed to send SMS:", smsError);
+        }
+      }
+
+      res.json(updatedBooking);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
     }
   });
 
@@ -679,7 +746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'host_application',
         title: 'New Host Application',
         message: `New host application from ${phone} for ${propertyType} in ${address}`,
-        metadata: JSON.stringify({ propertyType, address, description, phone, experience })
+        data: { propertyType, address, description, phone, experience }
       });
       
       res.json({ 

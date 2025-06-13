@@ -41,9 +41,13 @@ export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   createUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, updates: Partial<UpsertUser>): Promise<User>;
   getAllUsers(): Promise<User[]>;
+  deactivateUser(id: string): Promise<User>;
+  activateUser(id: string): Promise<User>;
   
   // Property operations
   getProperties(filters?: { featured?: boolean; limit?: number }): Promise<Property[]>;
@@ -61,7 +65,9 @@ export interface IStorage {
   // Booking operations
   getBookingsByUser(userId: string): Promise<Booking[]>;
   getBookingsByHost(hostId: string): Promise<Booking[]>;
+  getBooking(id: number): Promise<Booking | undefined>;
   createBooking(booking: InsertBooking): Promise<Booking>;
+  updateBookingStatus(id: number, status: string): Promise<Booking>;
   
   // Review operations
   getReviewsByProperty(propertyId: number): Promise<Review[]>;
@@ -124,6 +130,38 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async deactivateUser(id: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async activateUser(id: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ isActive: true, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
     return user;
   }
 
@@ -264,12 +302,26 @@ export class DatabaseStorage implements IStorage {
     return results;
   }
 
+  async getBooking(id: number): Promise<Booking | undefined> {
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, id));
+    return booking;
+  }
+
   async createBooking(booking: InsertBooking): Promise<Booking> {
     const [newBooking] = await db
       .insert(bookings)
       .values(booking)
       .returning();
     return newBooking;
+  }
+
+  async updateBookingStatus(id: number, status: string): Promise<Booking> {
+    const [booking] = await db
+      .update(bookings)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(bookings.id, id))
+      .returning();
+    return booking;
   }
 
   // Review operations

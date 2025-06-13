@@ -86,5 +86,8 @@ export const smsTemplates = {
     `Payment confirmed! ${amount} ${currency} received. Thank you for choosing HabibiStay.`,
 
   paymentFailed: (guestName: string) =>
-    `Hi ${guestName}, there was an issue processing your payment. Please update your payment method to complete your booking.`
+    `Hi ${guestName}, there was an issue processing your payment. Please update your payment method to complete your booking.`,
+
+  bookingStatusUpdate: (propertyName: string, status: string, checkIn: string) =>
+    `Your booking at ${propertyName} for ${checkIn} has been ${status}. Check your account for details.`
 };
