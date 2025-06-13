@@ -123,7 +123,7 @@ export function requireRole(allowedRoles: string[]) {
   };
 }
 
-// Enhanced unified authentication middleware with role detection
+// Enhanced unified authentication middleware with synchronous role detection
 export function authenticateUnified(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
@@ -139,27 +139,30 @@ export function authenticateUnified(req: AuthenticatedRequest, res: Response, ne
     }
   }
 
-  // Fallback to Replit Auth session with role detection
-  if ((req as any).user?.claims) {
+  // Check for Replit Auth session
+  if ((req as any).isAuthenticated && (req as any).isAuthenticated() && (req as any).user?.claims) {
     const replitUser = (req as any).user.claims;
     
-    // Check if user exists in database to get their role
-    storage.getUserByEmail(replitUser.email).then(dbUser => {
-      req.user = {
-        userId: replitUser.sub,
-        email: replitUser.email,
-        userType: dbUser?.userType || 'guest'
-      };
-      next();
-    }).catch(() => {
-      // If user not in database, create as guest
-      req.user = {
-        userId: replitUser.sub,
-        email: replitUser.email,
-        userType: 'guest'
-      };
-      next();
-    });
+    // Use async handler for database role lookup
+    (async () => {
+      try {
+        const dbUser = await storage.getUserByEmail(replitUser.email);
+        req.user = {
+          userId: replitUser.sub,
+          email: replitUser.email,
+          userType: dbUser?.userType || 'guest'
+        };
+        next();
+      } catch (error) {
+        // If user not in database, create as guest
+        req.user = {
+          userId: replitUser.sub,
+          email: replitUser.email,
+          userType: 'guest'
+        };
+        next();
+      }
+    })();
     return;
   }
 

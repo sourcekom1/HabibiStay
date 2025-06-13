@@ -615,8 +615,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Moderate property listings (admin only)
-  app.get('/api/admin/properties', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+  app.get('/api/admin/properties', authenticateUnified, async (req: any, res) => {
     try {
+      const currentUserId = req.user.userId || req.user.claims?.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
       const properties = await storage.getAllProperties();
       res.json(properties);
     } catch (error) {
@@ -626,8 +633,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Approve/reject property listing (admin only)
-  app.put('/api/admin/properties/:id/status', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+  app.put('/api/admin/properties/:id/status', authenticateUnified, async (req: any, res) => {
     try {
+      const currentUserId = req.user.userId || req.user.claims?.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
       const propertyId = parseInt(req.params.id);
       const { isActive, reason } = req.body;
       
