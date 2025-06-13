@@ -1,4 +1,5 @@
 import { storage } from './storage';
+import type { UpsertUser } from '../shared/schema';
 
 // Admin user setup utility for development and testing
 export async function setupAdminUser(email: string): Promise<void> {
@@ -15,14 +16,16 @@ export async function setupAdminUser(email: string): Promise<void> {
       console.log(`✅ User ${email} promoted to admin`);
     } else {
       // Create new admin user
-      await storage.createUser({
+      const adminData: UpsertUser = {
+        id: `admin_${Date.now()}`,
         email,
         firstName: 'Admin',
         lastName: 'User',
         userType: 'admin',
         isActive: true,
         emailVerified: true
-      });
+      };
+      await storage.createUser(adminData);
       console.log(`✅ Admin user created: ${email}`);
     }
   } catch (error) {
