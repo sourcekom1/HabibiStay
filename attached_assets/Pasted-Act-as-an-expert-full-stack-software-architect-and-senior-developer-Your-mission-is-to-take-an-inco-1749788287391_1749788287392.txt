@@ -1,0 +1,52 @@
+Act as an expert full-stack software architect and senior developer. Your mission is to take an incomplete project codebase, perform a comprehensive analysis, and then architect and implement all missing features to create a production-ready, deployable application.
+
+**Phase 1: Codebase Analysis & Strategic Plan**
+First, conduct a deep analysis of the entire provided codebase. Review every file and directory to reverse-engineer the project's current state. Produce a detailed report covering:
+1.  **Core Concept & Business Logic:** Infer the application's purpose and primary user flows.
+2.  **Technology Stack:** Identify all languages, frameworks, libraries, and databases currently in use.
+3.  **Architecture:** Diagram the existing software architecture (e.g., MVC, Microservices, Monolith) and data flow.
+4.  **File Structure:** Provide a commented file tree, explaining the role of key directories and files.
+5.  **Existing Features & Endpoints:** List all partially or fully implemented features and their corresponding API routes.
+6.  **Gap Analysis & Strategic Roadmap:** Identify all missing components required to make this a complete application, based on the features outlined in Phase 2. Propose a clear implementation plan.
+
+**Phase 2: Full-Stack Feature Implementation**
+Based on your analysis, implement the following complete features, ensuring clean, modular, and scalable code.
+
+1.  **Robust Authentication & Authorization:**
+    *   Implement secure user registration with email validation and encrypted password hashing.
+    *   Create a login system that issues and validates JWTs (JSON Web Tokens).
+    *   Implement role-based access control (RBAC) for three distinct roles: User, Host, and Admin.
+    *   Create protected routes and middleware to enforce authentication and role permissions across the application.
+    *   Implement a secure "Forgot Password" flow.
+
+2.  **Comprehensive Booking System:**
+    *   Develop a user-facing flow to browse listings, check availability based on a calendar, and request a booking.
+    *   Implement the backend logic to handle booking requests, prevent double-bookings, and calculate pricing.
+    *   Integrate a placeholder for a payment gateway.
+    *   Create an automated notification system (e.g., email stubs) for booking confirmations, modifications, and cancellations.
+
+3.  **Feature-Rich Host Dashboard:**
+    *   Create a secure area for users with the "Host" role.
+    *   Implement full CRUD (Create, Read, Update, Delete) functionality for property listings.
+    *   Develop a booking management interface where hosts can view, approve, or decline incoming booking requests.
+    *   Provide a calendar view showing existing bookings for their properties.
+    *   Display basic analytics, such as total earnings and occupancy rates.
+
+4.  **Powerful Admin Panel:**
+    *   Build a secure, admin-only dashboard for site-wide management.
+    *   Implement user management functionality (view, edit roles, suspend/delete users).
+    *   Implement content management for listings (override/delete inappropriate content).
+    *   Provide a system overview dashboard with key metrics (new users, total bookings, system health).
+
+**Phase 3: Database & Data Integrity**
+Design and provide the complete, normalized database schema in SQL DDL format. The schema must support all the features above, including tables for users, roles, properties, amenities, bookings, payments, and reviews. Create necessary seed files to populate the database with realistic sample data for development and testing.
+
+**Phase 4: Production Readiness & Deployment**
+Ensure the application is robust and ready for deployment:
+1.  **Error Handling & Logging:** Implement a global error handling strategy and structured logging for key events and errors.
+2.  **Security:** Apply security best practices, including input validation, output encoding (to prevent XSS), CSRF protection, and securing API endpoints according to the OWASP Top 10.
+3.  **API Documentation:** Generate clear and concise API documentation for all public endpoints.
+4.  **Environment Configuration:** Create a `.env.example` file with all necessary environment variables for database connections, API keys, and JWT secrets.
+5.  **Testing:** Write critical unit and integration tests for core functionality, especially for the authentication and booking systems.
+
+Begin by presenting your detailed analysis and strategic plan from Phase 1. Await approval before proceeding with the implementation.
