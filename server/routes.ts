@@ -441,9 +441,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ADMIN ROUTES - Comprehensive user and system management
   
-  // Get all users (admin only)
-  app.get('/api/admin/users', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+  // Get all users (admin only) - unified auth with role check
+  app.get('/api/admin/users', authenticateUnified, async (req: any, res) => {
     try {
+      const userId = req.user.userId || req.user.claims?.sub;
+      const currentUser = await storage.getUser(userId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
       const users = await storage.getAllUsers();
       const sanitizedUsers = users.map(user => ({
         id: user.id,
@@ -464,8 +471,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user role (admin only)
-  app.put('/api/admin/users/:id/role', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+  app.put('/api/admin/users/:id/role', authenticateUnified, async (req: any, res) => {
     try {
+      const currentUserId = req.user.userId || req.user.claims?.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
       const userId = req.params.id;
       const { userType } = req.body;
       
@@ -474,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Prevent self-demotion for safety
-      if (userId === req.user.userId && userType !== 'admin') {
+      if (userId === currentUserId && userType !== 'admin') {
         return res.status(400).json({ message: "Cannot change your own admin status" });
       }
 
@@ -501,12 +515,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Deactivate user (admin only)
-  app.put('/api/admin/users/:id/deactivate', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+  app.put('/api/admin/users/:id/deactivate', authenticateUnified, async (req: any, res) => {
     try {
+      const currentUserId = req.user.userId || req.user.claims?.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
       const userId = req.params.id;
       
       // Prevent self-deactivation
-      if (userId === req.user.userId) {
+      if (userId === currentUserId) {
         return res.status(400).json({ message: "Cannot deactivate your own account" });
       }
 
@@ -529,8 +550,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Activate user (admin only)
-  app.put('/api/admin/users/:id/activate', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+  app.put('/api/admin/users/:id/activate', authenticateUnified, async (req: any, res) => {
     try {
+      const currentUserId = req.user.userId || req.user.claims?.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
       const userId = req.params.id;
       const updatedUser = await storage.activateUser(userId);
       
@@ -551,8 +579,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get system analytics and metrics (admin only)
-  app.get('/api/admin/analytics', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+  app.get('/api/admin/analytics', authenticateUnified, async (req: any, res) => {
     try {
+      const currentUserId = req.user.userId || req.user.claims?.sub;
+      const currentUser = await storage.getUser(currentUserId);
+      
+      if (!currentUser || currentUser.userType !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
       const stats = await storage.getAdminStats();
       
       // Get recent analytics events
