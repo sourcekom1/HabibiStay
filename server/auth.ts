@@ -4,6 +4,11 @@ import nodemailer from 'nodemailer';
 import type { Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
 
+// Custom request type for JWT authentication
+export interface AuthenticatedRequest extends Request {
+  user?: JWTPayload;
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 const JWT_EXPIRES_IN = '7d';
 
@@ -105,7 +110,7 @@ export class AuthService {
 
 // Role-based access control middleware
 export function requireRole(allowedRoles: string[]) {
-  return (req: Request & { user?: JWTPayload }, res: Response, next: NextFunction) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Authentication required' });
     }
@@ -119,7 +124,7 @@ export function requireRole(allowedRoles: string[]) {
 }
 
 // JWT authentication middleware
-export function authenticateJWT(req: Request & { user?: JWTPayload }, res: Response, next: NextFunction) {
+export function authenticateJWT(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
@@ -137,7 +142,7 @@ export function authenticateJWT(req: Request & { user?: JWTPayload }, res: Respo
 }
 
 // Optional authentication middleware (doesn't block if no token)
-export function optionalAuth(req: Request & { user?: JWTPayload }, res: Response, next: NextFunction) {
+export function optionalAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
 

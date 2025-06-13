@@ -94,6 +94,10 @@ export interface IStorage {
     totalBookings: number;
     totalRevenue: number;
   }>;
+  getAllProperties(): Promise<Property[]>;
+  getActiveUsersCount(): Promise<number>;
+  getPendingBookingsCount(): Promise<number>;
+  getRecentBookings(limit: number): Promise<Booking[]>;
 
   // Notification operations
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -428,6 +432,29 @@ export class DatabaseStorage implements IStorage {
       totalBookings: bookingCount.count,
       totalRevenue: parseFloat(revenueSum.sum || '0'),
     };
+  }
+
+  async getAllProperties(): Promise<Property[]> {
+    return db.select().from(properties).orderBy(desc(properties.createdAt));
+  }
+
+  async getActiveUsersCount(): Promise<number> {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const [result] = await db.select({ count: count() }).from(users)
+      .where(and(eq(users.isActive, true), gte(users.lastLoginAt, thirtyDaysAgo)));
+    return result.count;
+  }
+
+  async getPendingBookingsCount(): Promise<number> {
+    const [result] = await db.select({ count: count() }).from(bookings)
+      .where(eq(bookings.status, 'pending'));
+    return result.count;
+  }
+
+  async getRecentBookings(limit: number): Promise<Booking[]> {
+    return db.select().from(bookings)
+      .orderBy(desc(bookings.createdAt))
+      .limit(limit);
   }
 
   // Notification operations

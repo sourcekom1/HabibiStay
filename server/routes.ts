@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { AuthService, authenticateJWT, requireRole, optionalAuth } from "./auth";
+import { AuthService, authenticateJWT, requireRole, optionalAuth, type AuthenticatedRequest } from "./auth";
 import { generateChatResponse, analyzeUserIntent } from "./openai";
 import { smsService, smsTemplates } from "./sms";
 import { 
@@ -439,9 +439,193 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/bookings', isAuthenticated, async (req: any, res) => {
+  // ADMIN ROUTES - Comprehensive user and system management
+  
+  // Get all users (admin only)
+  app.get('/api/admin/users', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const users = await storage.getAllUsers();
+      const sanitizedUsers = users.map(user => ({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        userType: user.userType,
+        emailVerified: user.emailVerified,
+        isActive: user.isActive,
+        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt
+      }));
+      res.json(sanitizedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Update user role (admin only)
+  app.put('/api/admin/users/:id/role', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      const { userType } = req.body;
+      
+      if (!['guest', 'host', 'admin'].includes(userType)) {
+        return res.status(400).json({ message: "Invalid user type" });
+      }
+
+      // Prevent self-demotion for safety
+      if (userId === req.user.userId && userType !== 'admin') {
+        return res.status(400).json({ message: "Cannot change your own admin status" });
+      }
+
+      const updatedUser = await storage.updateUser(userId, { userType });
+      
+      // Create notification for user
+      await storage.createNotification({
+        userId,
+        type: 'system',
+        title: 'Account Role Updated',
+        message: `Your account role has been updated to ${userType}`,
+        data: { newRole: userType }
+      });
+
+      res.json({ 
+        id: updatedUser.id, 
+        userType: updatedUser.userType,
+        message: "User role updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
+    }
+  });
+
+  // Deactivate user (admin only)
+  app.put('/api/admin/users/:id/deactivate', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      
+      // Prevent self-deactivation
+      if (userId === req.user.userId) {
+        return res.status(400).json({ message: "Cannot deactivate your own account" });
+      }
+
+      const updatedUser = await storage.deactivateUser(userId);
+      
+      // Create notification for user
+      await storage.createNotification({
+        userId,
+        type: 'system',
+        title: 'Account Deactivated',
+        message: 'Your account has been deactivated. Contact support for assistance.',
+        data: { reason: 'admin_action' }
+      });
+
+      res.json({ message: "User deactivated successfully" });
+    } catch (error) {
+      console.error("Error deactivating user:", error);
+      res.status(500).json({ message: "Failed to deactivate user" });
+    }
+  });
+
+  // Activate user (admin only)
+  app.put('/api/admin/users/:id/activate', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      const updatedUser = await storage.activateUser(userId);
+      
+      // Create notification for user
+      await storage.createNotification({
+        userId,
+        type: 'system',
+        title: 'Account Activated',
+        message: 'Your account has been reactivated. Welcome back!',
+        data: { reason: 'admin_action' }
+      });
+
+      res.json({ message: "User activated successfully" });
+    } catch (error) {
+      console.error("Error activating user:", error);
+      res.status(500).json({ message: "Failed to activate user" });
+    }
+  });
+
+  // Get system analytics and metrics (admin only)
+  app.get('/api/admin/analytics', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminStats();
+      
+      // Get recent analytics events
+      const recentAnalytics = await storage.getAnalytics({
+        startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+        endDate: new Date()
+      });
+
+      // Calculate additional metrics
+      const activeUsers = await storage.getActiveUsersCount();
+      const pendingBookings = await storage.getPendingBookingsCount();
+      const recentBookings = await storage.getRecentBookings(10);
+
+      res.json({
+        ...stats,
+        activeUsers,
+        pendingBookings,
+        recentAnalytics: recentAnalytics.slice(0, 50),
+        recentBookings
+      });
+    } catch (error) {
+      console.error("Error fetching admin analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Moderate property listings (admin only)
+  app.get('/api/admin/properties', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+    try {
+      const properties = await storage.getAllProperties();
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching properties for moderation:", error);
+      res.status(500).json({ message: "Failed to fetch properties" });
+    }
+  });
+
+  // Approve/reject property listing (admin only)
+  app.put('/api/admin/properties/:id/status', authenticateJWT, requireRole(['admin', 'super_admin']), async (req: any, res) => {
+    try {
+      const propertyId = parseInt(req.params.id);
+      const { isActive, reason } = req.body;
+      
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+
+      const updatedProperty = await storage.updateProperty(propertyId, { isActive });
+      
+      // Notify the host
+      await storage.createNotification({
+        userId: property.hostId,
+        type: 'property',
+        title: `Property ${isActive ? 'Approved' : 'Rejected'}`,
+        message: `Your property "${property.title}" has been ${isActive ? 'approved' : 'rejected'}${reason ? `: ${reason}` : ''}`,
+        data: { propertyId, isActive, reason }
+      });
+
+      res.json({ 
+        message: `Property ${isActive ? 'approved' : 'rejected'} successfully`,
+        property: updatedProperty 
+      });
+    } catch (error) {
+      console.error("Error updating property status:", error);
+      res.status(500).json({ message: "Failed to update property status" });
+    }
+  });
+
+  // Enhanced booking system with calendar-based availability
+  app.post('/api/bookings', authenticateJWT, async (req: any, res) => {
+    try {
+      const userId = req.user.userId;
       const bookingData = insertBookingSchema.parse({
         ...req.body,
         guestId: userId
