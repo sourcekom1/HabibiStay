@@ -17,6 +17,34 @@ import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./payp
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoints for production monitoring
+  app.get('/health', (req, res) => {
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV,
+      version: '1.0.0'
+    });
+  });
+
+  app.get('/health/database', async (req, res) => {
+    try {
+      await storage.getAdminStats();
+      res.status(200).json({
+        status: 'healthy',
+        database: 'connected',
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(503).json({
+        status: 'unhealthy',
+        database: 'disconnected',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   // Auth middleware
   await setupAuth(app);
 

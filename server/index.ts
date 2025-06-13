@@ -4,8 +4,20 @@ import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed";
 import { initializeAdminAccess } from "./adminSetup";
 import { generalLimiter, securityHeaders, sanitizeInput, corsConfig } from "./middleware/security";
+import { performanceMonitoring, errorTracking, requestLogging } from "./middleware/monitoring";
 
 const app = express();
+
+// Apply security middleware
+app.use(corsConfig);
+app.use(securityHeaders);
+app.use(generalLimiter);
+app.use(sanitizeInput);
+
+// Apply monitoring middleware
+app.use(requestLogging);
+app.use(performanceMonitoring);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
