@@ -1,117 +1,133 @@
-import { Express, Request, Response, NextFunction } from "express";
+import rateLimit from 'express-rate-limit';
+import { Request, Response, NextFunction } from 'express';
 
-// Rate limiting store
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+// General API rate limiting
+export const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: {
+    error: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-// Rate limiting middleware factory
-export function createRateLimiter(windowMs: number, max: number, message?: string) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const key = req.ip || req.connection.remoteAddress || 'unknown';
-    const now = Date.now();
-    
-    // Clean up expired entries
-    const keysToDelete: string[] = [];
-    rateLimitStore.forEach((value, key) => {
-      if (now > value.resetTime) {
-        keysToDelete.push(key);
-      }
-    });
-    keysToDelete.forEach(key => rateLimitStore.delete(key));
-    
-    const record = rateLimitStore.get(key);
-    
-    if (!record || now > record.resetTime) {
-      rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
-      next();
-    } else if (record.count < max) {
-      record.count++;
-      next();
-    } else {
-      res.status(429).json({
-        error: message || "Too many requests from this IP, please try again later.",
-        retryAfter: Math.ceil((record.resetTime - now) / 1000)
-      });
-    }
-  };
-}
+// Strict rate limiting for authentication endpoints
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 auth requests per windowMs
+  message: {
+    error: 'Too many authentication attempts, please try again later.'
+  },
+  skipSuccessfulRequests: true,
+});
+
+// Search endpoint rate limiting
+export const searchLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 30, // Limit each IP to 30 search requests per minute
+  message: {
+    error: 'Too many search requests, please try again later.'
+  },
+});
+
+// Admin endpoint rate limiting
+export const adminLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 50, // Limit each IP to 50 admin requests per 5 minutes
+  message: {
+    error: 'Too many admin requests, please try again later.'
+  },
+});
 
 // Security headers middleware
 export function securityHeaders(req: Request, res: Response, next: NextFunction) {
-  // Security headers
-  res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Prevent clickjacking
   res.setHeader('X-Frame-Options', 'DENY');
+  
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  
+  // XSS protection
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  
+  // HSTS in production
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
   
   // Content Security Policy
-  const csp = [
-    "default-src 'self'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
-    "img-src 'self' data: https: blob:",
-    "script-src 'self' 'unsafe-inline'",
-    "connect-src 'self' https://api.openai.com https://api.paypal.com",
-    "frame-src 'self' https://www.paypal.com"
-  ].join('; ');
+  res.setHeader('Content-Security-Policy', 
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paypal.com; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: blob: https:; " +
+    "connect-src 'self' https://api.openai.com https://api.twilio.com; " +
+    "frame-src https://js.paypal.com;"
+  );
   
-  res.setHeader('Content-Security-Policy', csp);
   next();
 }
 
-// CORS middleware
-export function corsMiddleware(req: Request, res: Response, next: NextFunction) {
-  const allowedOrigins = process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL].filter(Boolean) 
-    : ['http://localhost:5000', 'http://localhost:3000'];
+// Request sanitization middleware
+export function sanitizeInput(req: Request, res: Response, next: NextFunction) {
+  // Basic XSS prevention for string inputs
+  function sanitizeString(str: string): string {
+    return str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+              .replace(/javascript:/gi, '')
+              .replace(/on\w+\s*=/gi, '');
+  }
+  
+  function sanitizeObject(obj: any): any {
+    if (typeof obj === 'string') {
+      return sanitizeString(obj);
+    } else if (Array.isArray(obj)) {
+      return obj.map(sanitizeObject);
+    } else if (obj && typeof obj === 'object') {
+      const sanitized: any = {};
+      for (const key in obj) {
+        sanitized[key] = sanitizeObject(obj[key]);
+      }
+      return sanitized;
+    }
+    return obj;
+  }
+  
+  if (req.body) {
+    req.body = sanitizeObject(req.body);
+  }
+  
+  if (req.query) {
+    req.query = sanitizeObject(req.query);
+  }
+  
+  next();
+}
+
+// CORS configuration
+export function corsConfig(req: Request, res: Response, next: NextFunction) {
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    process.env.FRONTEND_URL,
+    process.env.REPL_URL
+  ].filter(Boolean) as string[];
   
   const origin = req.headers.origin;
   if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
   
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400');
   
   if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
+    res.status(200).end();
     return;
   }
   
   next();
-}
-
-// Input validation middleware
-export function validateInput(req: Request, res: Response, next: NextFunction) {
-  // Sanitize query parameters
-  for (const key in req.query) {
-    if (typeof req.query[key] === 'string') {
-      req.query[key] = (req.query[key] as string).trim();
-    }
-  }
-  
-  // Validate content length
-  const contentLength = parseInt(req.headers['content-length'] || '0');
-  if (contentLength > 10 * 1024 * 1024) { // 10MB limit
-    return res.status(413).json({ error: 'Request entity too large' });
-  }
-  
-  next();
-}
-
-// Rate limiters
-export const apiLimiter = createRateLimiter(15 * 60 * 1000, 100);
-export const authLimiter = createRateLimiter(15 * 60 * 1000, 5, "Too many authentication attempts");
-export const searchLimiter = createRateLimiter(1 * 60 * 1000, 30);
-
-export function setupSecurity(app: Express) {
-  app.use(securityHeaders);
-  app.use(corsMiddleware);
-  app.use(validateInput);
-  
-  // Apply rate limiting
-  app.use('/api/', apiLimiter);
-  app.use('/api/auth/', authLimiter);
-  app.use('/api/search', searchLimiter);
 }
