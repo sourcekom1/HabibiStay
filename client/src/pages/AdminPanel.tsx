@@ -35,12 +35,12 @@ export default function AdminPanel() {
 
   const { data: users = [], isLoading: usersLoading } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
-    enabled: !!user && user.userType === 'admin',
+    enabled: !!user,
   });
 
   const { data: stats = {}, isLoading: statsLoading } = useQuery<any>({
     queryKey: ["/api/admin/stats"],
-    enabled: !!user && user.userType === 'admin',
+    enabled: !!user,
   });
 
   useEffect(() => {
